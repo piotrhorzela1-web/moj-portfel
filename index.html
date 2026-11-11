@@ -732,6 +732,25 @@ function lineChart(series,o){
   const leg=series.map(s=>`<span style="margin-right:14px"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.color};margin-right:5px"></i>${s.name}</span>`).join('');
   return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}${paths}</svg><div class="note" style="text-align:center">${leg}</div>`;
 }
+function divChart(list){
+  const by={};
+  list.forEach(A=>A.evs.forEach(e=>{if(e.k!=='div')return;const d=new Date(e.t).toISOString(),y=d.slice(0,4);by[y]=(by[y]||0)+e.x*hrate(A.a.cur,d)}));
+  const ys=Object.keys(by).sort();
+  if(!ys.length)return'<div class="mut">Brak dywidend w zaimportowanych raportach</div>';
+  const yrs=[];for(let y=+ys[0];y<=+ys[ys.length-1];y++)yrs.push(String(y));
+  const W=640,H=250,L=56,R=16,T=22,B=26;
+  const vals=yrs.map(y=>by[y]||0);
+  const yt=niceTicks(Math.min(0,...vals),Math.max(...vals,1),5),y0=yt.t[0],y1=yt.t[yt.t.length-1];
+  const Y=v=>T+(1-(v-y0)/(y1-y0))*(H-T-B),sl=(W-L-R)/yrs.length,bw=Math.min(70,sl*0.62);
+  let g='';
+  yt.t.forEach(v=>{const y=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${v===0?'#8895ab':'#e2e5ec'}"/><text x="${L-5}" y="${y+3}" text-anchor="end">${yt.st>=1000?fmt(v/1000,yt.st%1000?1:0)+'k':fmt(v,0)}</text>`});
+  const cy=String(new Date().getFullYear());
+  yrs.forEach((y,i)=>{const v=vals[i],cx=L+sl*(i+.5),a=Y(Math.max(v,0)),b=Y(Math.min(v,0));
+    g+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${a.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(b-a,0.5).toFixed(1)}" rx="3" fill="${v<0?'#b3261e':'#0b3d00'}" opacity="${y===cy?.55:1}"><title>${y}: ${fmt(v)} zł</title></rect>`;
+    g+=`<text class="v" x="${cx.toFixed(1)}" y="${(v<0?b+12:a-5).toFixed(1)}" text-anchor="middle" font-weight="700">${fmt(v,sl<60?0:2)}</text>`;
+    g+=`<text x="${cx.toFixed(1)}" y="${H-8}" text-anchor="middle">${y}</text>`});
+  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}</svg><div class="note" style="text-align:center">Razem: <b class="v">${fmt(sum(vals))} zł</b>${yrs.includes(cy)?' · jaśniejszy słupek = bieżący rok (jeszcze trwa)':''}</div>`;
+}
 function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const A=p(a),B=p(b);return'#'+A.map((x,i)=>Math.round(x+(B[i]-x)*t).toString(16).padStart(2,'0')).join('')}
 function tm(items,x,y,w,h,out){
   if(!items.length)return;
@@ -859,6 +878,7 @@ function vDash(){
   const series=[{name:'Wkład własny (w zł)',pts:tl.wk,color:COL[2],step:true},{name:'Wartość po koszcie + gotówka (w zł)',pts:tl.cost,color:COL[1]}];
   if(tl.cost.length){const lc=tl.cost[tl.cost.length-1];series.push({name:'Wartość rynkowa dziś (w zł)',pts:[lc,[Date.now(),agg(list,'PLN').val]],color:COL[3],dash:true,dots:true})}
   h+=`<div class="card"><h2>Wkład własny i wartość w czasie</h2><div class="info">Wykres pokazuje wkład oraz wartość po koszcie zakupu (z gotówką); ostatni punkt to wartość rynkowa. ${S.twr?'„Stopa” i „Śr. roczna stopa” to TWR liczony z historii notowań (jak w myfund).':'Bez historii notowań „Stopa” to zysk/wkład, a „Śr. roczna stopa” to XIRR – włącz serwer cen i kliknij „Przelicz historię i TWR”, aby liczyć TWR.'}</div>${lineChart(series)}</div>`;
+  h+=`<div class="card"><h2>Dywidendy w kolejnych latach <small>zł</small></h2><div class="info">Dywidendy netto (po potrąceniu podatku u źródła) ze wszystkich wybranych kont, przeliczone na złote ${hasHist?'po kursie NBP z dnia wypłaty':'po bieżącym kursie (po pobraniu historycznych kursów NBP – po kursie z dnia wypłaty)'}.</div>${divChart(list)}</div>`;
   const items=[];list.forEach(A=>A.list.forEach(r=>items.push({l:r.s,v:r.val*curRate(A.a.cur),ret:r.ret})));
   const merged={};items.forEach(i=>{const m=merged[i.l]||(merged[i.l]={l:i.l,v:0,cost:0});m.v+=i.v;});
   list.forEach(A=>A.list.forEach(r=>{merged[r.s].cost+=r.cost*curRate(A.a.cur)}));
