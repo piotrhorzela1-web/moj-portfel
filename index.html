@@ -291,7 +291,7 @@ async function refreshLive(quiet){
     const x=q[r.s];if(!x)return;
     const k=curRate(x.cur)/curRate(A.a.cur),key=A.a.id+'|'+r.s,old=S.px[key];
     const p=x.p*k;
-    if(old&&old.p>0&&Math.abs(p/old.p-1)>0.3){const m=r.s+' (cena z Yahoo odbiega >30%)';if(!bad.includes(m))bad.push(m);return}
+    if(old&&old.p>0&&(p/old.p>2.5||p/old.p<0.4)){const m=r.s+' (cena z Yahoo zupełnie inna niż w raporcie – sprawdź symbol)';if(!bad.includes(m))bad.push(m);return}
     S.px[key]=Object.assign({},old,{p,d:today,prev:x.prev!=null?x.prev*k:(old?old.prev:null)});
     seen.add(r.s);
   }));
