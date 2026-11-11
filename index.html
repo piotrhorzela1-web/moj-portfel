@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mój Portfel</title>
+<meta name="theme-color" content="#050a1b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mój Portfel">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{--bg:#f4f4fa;--card:#fff;--ink:#0b1220;--mut:#5d6778;--line:#dfe3ea;--bd:#8895ab;--navy:#050a1b;--pos:#2a7d00;--neg:#ff5c5c;--soft:#eef0f6;--acc:#1f4fd8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+body.hide .v{filter:blur(7px);user-select:none}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10;padding-top:env(safe-area-inset-top)}
+.top{max-width:1180px;margin:0 auto;padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.logo{font-weight:800;font-size:17px;font-style:italic}
+.top select{min-width:190px;font-weight:600}
+.tk{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-left:auto;flex-wrap:wrap}
+.tk b{color:var(--ink);font-weight:600;cursor:pointer}
+.tabs{max-width:1180px;margin:0 auto;padding:0 16px 6px;display:flex;gap:2px;flex-wrap:wrap}
+.tabs button{background:none;border:0;padding:6px 12px;border-radius:7px;cursor:pointer;color:var(--mut);font:inherit}
+.tabs button.on{background:var(--soft);color:var(--ink);font-weight:700}
+main{max-width:1180px;margin:0 auto;padding:14px 16px 60px}
+select,input,textarea{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--bd);border-radius:7px;padding:6px 9px}
+input[type=checkbox]{accent-color:var(--acc)}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:6px;padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px}
+.btn.sec{background:var(--soft);color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.link{background:none;border:0;color:var(--neg);cursor:pointer}
+.card{background:var(--card);border-radius:10px;padding:14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,30,60,.12)}
+.card>h2{margin:0 0 12px;font-size:19px;font-style:italic;font-weight:700}
+.card>h2 small{font-size:12px;font-weight:400;color:var(--mut);font-style:normal;margin-left:8px}
+.set label{display:block;font-size:12px;font-weight:600;font-style:italic;margin:10px 0 3px}
+.set .ck{display:flex;gap:8px;align-items:center;font-weight:600;font-style:italic;font-size:12px;margin:8px 0}
+.set select{width:100%;max-width:520px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tl{border:1px solid var(--bd);border-radius:8px;padding:6px 12px 8px;min-height:62px;background:#fff}
+.tl .l{display:block;font-size:12.5px;font-style:italic;color:#222}
+.tl b{font-size:21px;font-style:italic;font-weight:600;display:block;white-space:nowrap}
+.tl.two{display:flex;justify-content:space-between;gap:8px}
+.tl.two div{flex:1}
+.tl.two div+div{text-align:right}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}
+.pf{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.pc{border:1px solid var(--bd);border-radius:10px;padding:10px 14px;width:260px;position:relative}
+.pc.ex{border-style:dashed;background:#fafafa}.pc.ex>*:not(.exl){opacity:.45}
+.pc .exl{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--mut);margin-top:8px;cursor:pointer}
+.pc h4{margin:0;font-size:17px;font-style:italic}
+.pc h4 span{font-size:11px;font-weight:400;color:var(--mut);margin-left:6px;font-style:normal}
+.pc .big{font-size:19px;font-style:italic;margin:4px 0 8px}
+.bdg{display:inline-block;color:#fff;border-radius:4px;padding:1px 9px;font-weight:700;font-style:italic;font-size:13px}
+.bdg.pos{background:var(--pos);color:#fff}.bdg.neg{background:var(--neg);color:#fff}
+.pc .sub{font-size:12px;font-style:italic;margin:2px 2px 8px}
+.pc hr{border:0;border-top:1px solid var(--line);margin:6px 0}
+.pc .r{display:flex;justify-content:space-between;align-items:center;margin:5px 0;font-style:italic;font-size:13px}
+.btns{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 7px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--navy);color:#fff;font-size:11.5px;font-weight:700;text-align:center;line-height:1.2}
+td:first-child,th:first-child,td.l,th.l{text-align:left}
+tr.grp td{background:#eceef3;font-weight:700;text-align:left;white-space:normal}
+tr.tot td{background:#f3f4f8;font-weight:700;font-style:italic}
+.tw{overflow-x:auto}
+.dn{display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center}
+.dn svg{width:250px;height:250px}
+.leg{display:grid;gap:5px;font-size:13px}
+.leg div{display:flex;gap:8px;align-items:center}
+.leg i{width:11px;height:11px;border-radius:2px;flex:none}
+.tm{position:relative;width:100%;aspect-ratio:16/9;background:#fff;border-radius:4px;overflow:hidden}
+.tm .sh{position:absolute;left:5px;top:4px;font-weight:700;font-style:normal;font-size:13px;line-height:1;opacity:.85;white-space:nowrap}
+.tm div{position:absolute;border:1px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-style:italic;font-size:15px;overflow:hidden;text-align:center;color:#111;line-height:1.25;padding-top:12px;box-sizing:border-box}
+.tm div span{white-space:nowrap}
+.tm div.sm{font-size:12px;padding-top:11px}.tm div.sm .sh{font-size:11px;left:3px;top:2px}
+.note{font-size:12px;color:var(--mut);margin:6px 0}
+.info{background:#eef0f6;border-radius:6px;padding:8px 12px;font-size:12px;color:#444;margin-bottom:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px}
+.row label{display:block;font-size:12px;color:var(--mut)}
+.empty{text-align:center;padding:50px 20px}
+.tag{background:var(--soft);border-radius:5px;padding:1px 7px;font-size:11px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0b1220;color:#fff;padding:9px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;max-width:90vw;z-index:30}
+#toast.on{opacity:1}
+svg text{fill:#555;font-size:10px}
+@media(max-width:700px){.g3{grid-template-columns:1fr}.tl b{font-size:19px}}
+@media(max-width:700px){
+  body{font-size:14px}
+  .top{padding:6px 10px;gap:8px}
+  .logo{font-size:15px}
+  .top select{min-width:0;flex:1 1 140px;max-width:100%}
+  .tk{order:3;width:100%;margin-left:0;gap:10px;font-size:11px}
+  .tk span+span{display:none}
+  #usr .btn{padding:6px 10px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 8px 6px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{white-space:nowrap;flex:none;padding:8px 10px}
+  main{padding:10px 8px calc(60px + env(safe-area-inset-bottom))}
+  .card{padding:12px 10px;border-radius:8px}
+  .card>h2{font-size:17px}
+  .pc{width:100%}
+  .dn svg{width:210px;height:210px}
+  .tm{aspect-ratio:3/4}
+  .tm div{font-size:12px}.tm div.sm{font-size:10px}.tm .sh{font-size:11px}.tm div.sm .sh{font-size:9px}
+  select,input,textarea{font-size:16px}
+  .set select{max-width:100%}
+  th,td{padding:5px 6px;font-size:12px}
+  .row>div{flex:1 1 100%}
+  .row input[type=file]{width:100%}
+  .um{right:-4px}
+  svg text{font-size:19px}
+}
+#login{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;overflow:auto}
+#login .box{max-width:460px;margin:8vh auto;padding:0 16px}
+.pfb{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0;cursor:pointer;font-size:15px}
+.pfb:hover{border-color:var(--acc)}
+.pfb i{width:36px;height:36px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700}
+.pfb small{color:var(--mut);margin-left:auto}
+#usr{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:13px;position:relative}
+.um{position:absolute;right:0;top:36px;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15);min-width:210px;padding:6px;z-index:50}
+.um button{display:block;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--ink)}
+.um button:hover{background:var(--soft)}.um .dg{color:var(--neg)}.um hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+#modal{position:fixed;inset:0;z-index:200;background:rgba(5,10,27,.5);display:none;align-items:center;justify-content:center;padding:16px}
+#modal .card{max-width:400px;width:100%;margin:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <span class="logo">📈 Mój Portfel</span>
+    <select id="flt"></select>
+    <div class="tk" id="tk"></div>
+    <span id="usr"></span>
+  </div>
+  <div class="tabs" id="nav"></div>
+</header>
+<main id="app"></main>
+<div id="login"></div>
+<div id="modal"></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ================= Stan ================= */
+const LS0='mojportfel.v2',PK='mojportfel.profiles';
+const ss=(k,v)=>{try{if(v===undefined)return sessionStorage.getItem(k);if(v===null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,v)}catch(e){return null}};
+function loadP(){let l=[];try{const d=JSON.parse(localStorage.getItem(PK)||'null');if(d&&Array.isArray(d.list))l=d.list}catch(e){}
+  if(!l.length){try{const old=localStorage.getItem(LS0);if(old){const id=Math.random().toString(36).slice(2,10);localStorage.setItem(LS0+'.'+id,old);l=[{id,name:'Mój profil',salt:'',hash:''}];localStorage.setItem(PK,JSON.stringify({list:l}));localStorage.removeItem(LS0)}}catch(e){}}
+  return {list:l}}
+const P=loadP();
+const saveP=()=>{try{localStorage.setItem(PK,JSON.stringify({list:P.list}))}catch(e){toast('Nie można zapisać profili')}};
+let CUR=ss('mojportfel.cur');
+if(CUR&&!P.list.some(x=>x.id===CUR))CUR=null;
+if(!CUR&&P.list.length===1&&!P.list[0].hash&&!ss('mojportfel.out'))CUR=P.list[0].id;
+const LS=CUR?LS0+'.'+CUR:null;
+const ME=()=>P.list.find(x=>x.id===CUR);
+const KINDS=['IKE','IKZE','Zwykłe'];
+const COL=['#7a0b0b','#0b3d00','#4e79a7','#f28e2b','#76b7b2','#b07aa1','#edc948','#9c755f','#ff9da7','#59a14f'];
+const FLOW=new Set(['Deposit','Withdrawal','IKE deposit','IKZE deposit','Transfer','Subaccount transfer']);
+const CFDT=new Set(['Close trade','Swap']);
+const DIVT=new Set(['Dividend','Dividend from foreign company on PL market','Dividend equivalent','Withholding tax','Adjustment fee']);
+const LEG={'Deposit':'Wpłata','Withdrawal':'Wypłata','IKE deposit':'Przelew IKE','IKZE deposit':'Przelew IKZE','Transfer':'Konwersja walut','Free funds interest':'Odsetki od wolnych środków','Free funds interest tax':'Podatek od odsetek','Dividend':'Dywidenda','Dividend from foreign company on PL market':'Dywidenda (zagraniczna)','Dividend equivalent':'Ekwiwalent dywidendy','Withholding tax':'Podatek u źródła','Adjustment fee':'Korekta dywidendy','SEC fee':'Opłata SEC','Correction':'Korekta','Swap':'Swap','Close trade':'Wynik CFD','Subaccount transfer':'Przelew między subkontami'};
+const blank=()=>({accounts:[],lots:[],cash:[],inst:{},px:{},fx:{USD:3.8938,EUR:4.3677,GBP:5.1839,CHF:4.7154},fxh:{},snaps:[],opt:{cur:'PLN',hide:false,round:false,percur:true,auto:true,cfdIn:false},ysym:{},twr:null,live:null});
+let S=load(),MC=null;
+const SV={ok:false,busy:'',prog:''};
+let V={tab:'dash',acc:'all',lq:'',lt:'all'};
+function load(){if(!LS)return blank();try{const r=localStorage.getItem(LS);if(r){const d=JSON.parse(r);const b=blank();return Object.assign(b,d,{opt:Object.assign(b.opt,d.opt)})}}catch(e){}return blank()}
+function save(){MC=null;if(!LS)return;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('Nie można zapisać danych w przeglądarce (brak miejsca?)')}}
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),4500)}
+
+/* ================= Format ================= */
+const fmt=(n,d=2)=>(n==null||!isFinite(n))?'–':n.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const big=n=>{if(n==null||!isFinite(n))return'–';if(S.opt.round){const a=Math.abs(n);if(a>=1e6)return fmt(n/1e6)+' mln';if(a>=1e4)return fmt(n/1e3,1)+' tys.'}return fmt(n)};
+const sg=n=>(n>0?'+':'')+big(n);
+const pc=n=>(n==null||!isFinite(n))?'–':n>10000?'> +10 000 %':(n>0?'+':'')+fmt(n)+' %';
+const cl=n=>n==null||!isFinite(n)?'':n>0.005?'pos':n<-0.005?'neg':'';
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const day=d=>String(d).slice(0,10);
+const ms=d=>Date.parse(String(d).replace(' ','T')+(String(d).length>10?'Z':'T00:00:00Z'));
+const acc=id=>S.accounts.find(a=>a.id===id);
+
+/* ================= Kursy walut ================= */
+const curRate=c=>c==='PLN'||!c?1:c==='GBX'?(S.fx.GBP||1)/100:(S.fx[c]||1);
+function hrate(c,d){
+  if(!c||c==='PLN')return 1;
+  if(c==='GBX')return hrate('GBP',d)/100;
+  const h=S.fxh[c];if(!h||!h.d.length)return curRate(c);
+  const k=day(d);let lo=0,hi=h.d.length-1,a=-1;
+  while(lo<=hi){const m=(lo+hi)>>1;if(h.d[m]<=k){a=m;lo=m+1}else hi=m-1}
+  return a<0?h.v[0]:h.v[a];
+}
+function flowPln(a,e){
+  if(e.t==='Transfer'){
+    const m=/conversion,\s*([A-Z]{3}) to ([A-Z]{3}).*?rate:\s*([\d.]+)/i.exec(e.m||'');
+    if(m&&e.x>0&&+m[3]>0)return e.x/+m[3]*hrate(m[1].toUpperCase(),e.d);
+  }
+  return e.x*hrate(a.cur,e.d);
+}
+// Adres serwera cen: ustawiony ręcznie (Ustawienia) > lokalny serwer (start.bat) > domyślny pośrednik w internecie
+const DEFAULT_API='https://moj-portfel-ceny.piotr-horzela1.workers.dev';
+const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const LOCAL=location.protocol==='file:'||['localhost','127.0.0.1'].includes(location.hostname);
+function apiBase(){let o='';try{o=localStorage.getItem('mojportfel.api')||''}catch(e){}
+  if(o)return o.trim().replace(/\/+$/,'');
+  if(location.protocol==='file:')return'http://localhost:8787';
+  if(LOCAL)return'';
+  return DEFAULT_API.replace(/\/+$/,'');}
+let BASE=apiBase();
+const SRVHINT=()=>LOCAL?'uruchom start.bat (albo ikonę „Moj Portfel”)':'sprawdź „Serwer cen” w Ustawieniach';
+async function ping(){try{const r=await fetch(BASE+'/api/ping',{cache:'no-store'});SV.ok=r.ok&&(await r.text()).trim()==='ok'}catch(e){SV.ok=false}}
+async function api(u,ttl=0){
+  const r=await fetch(BASE+'/api/get?ttl='+ttl+'&u='+encodeURIComponent(u));
+  if(!r.ok){const e=new Error('HTTP '+r.status);e.status=r.status;throw e}
+  return r.json();
+}
+async function getJ(u,ttl){
+  if(SV.ok){try{return await api(u,ttl)}catch(e){if(e.status===404)return null;throw e}}
+  const r=await fetch(u);return r.ok?r.json():null;
+}
+async function fetchNBP(quiet){
+  try{
+    const j=await getJ('https://api.nbp.pl/api/exchangerates/tables/A/?format=json',1800);
+    let n=0;j[0].rates.forEach(x=>{S.fx[x.code]=x.mid;n++});
+    S.fxDate=j[0].effectiveDate;save();render();if(!quiet)toast(`Kursy NBP z ${S.fxDate} (${n} walut)`);
+  }catch(e){if(!quiet)toast('Nie udało się pobrać kursów z NBP – wpisz je ręcznie w Ustawieniach')}
+}
+async function fetchHist(quiet,extra){
+  const curs=[...new Set([...S.accounts.map(a=>a.cur),...(extra||[])].filter(c=>c&&c!=='PLN'&&c!=='GBX'))];
+  if(!curs.length||!S.cash.length)return;
+  const first=S.cash.reduce((m,e)=>e.d<m?e.d:m,'9999');
+  let ok=0;
+  try{
+    for(const c of curs){
+      const d=[],v=[];
+      let s=new Date(day(first)+'T00:00:00Z');s.setUTCDate(s.getUTCDate()-7);
+      const end=new Date();
+      while(s<end){
+        const e=new Date(Math.min(s.getTime()+360*864e5,end.getTime()));
+        const j=await getJ(`https://api.nbp.pl/api/exchangerates/rates/a/${c.toLowerCase()}/${s.toISOString().slice(0,10)}/${e.toISOString().slice(0,10)}/?format=json`,43200);
+        if(j){j.rates.forEach(x=>{d.push(x.effectiveDate);v.push(x.mid)});ok++}
+        s=new Date(e.getTime()+864e5);
+      }
+      if(d.length)S.fxh[c]={d,v};
+    }
+    save();if(!quiet){render();toast(ok?'Pobrano historyczne kursy NBP':'Brak danych z NBP')}
+  }catch(e){if(!quiet)toast('Nie udało się pobrać kursów historycznych z NBP – wkład w zł liczony po bieżących kursach')}
+}
+
+/* ================= Notowania (Yahoo Finance przez lokalny serwer) ================= */
+const YMAP={PL:'WA',DE:'DE',NL:'AS',FR:'PA',ES:'MC',IT:'MI',UK:'L',CH:'SW',DK:'CO',BE:'BR',FI:'HE',IE:'IR',PT:'LS',SE:'ST',NO:'OL',AT:'VI'};
+function ysym(s){
+  if(S.ysym&&S.ysym[s])return S.ysym[s];
+  if(YOV[s])return YOV[s];
+  const m=/^(.+)\.([A-Z]{2})$/.exec(s);if(!m)return s;
+  if(m[2]==='US')return m[1].replace(/\./g,'-');
+  return YMAP[m[2]]?m[1]+'.'+YMAP[m[2]]:s;
+}
+const YOV={'BRKB.US':'BRK-B','NOVOB.DK':'NOVO-B.CO','BRK.B.US':'BRK-B'};
+const ycur=c=>c==='GBp'||c==='GBX'?'GBX':c;
+async function pool(items,n,fn){let i=0;await Promise.all(Array.from({length:n},async()=>{while(i<items.length){await fn(items[i++])}}))}
+function setStatus(){const e=document.getElementById('svs');if(e)e.innerHTML=statusText()}
+function statusText(){
+  if(!SV.ok)return'<span class="neg">Serwer cen nie działa</span> – '+SRVHINT()+'.';
+  if(SV.busy)return`Trwa ${SV.busy==='hist'?'pobieranie historii notowań':'odświeżanie cen'} ${SV.prog}…`;
+  return`<span class="pos">Serwer cen działa.</span> ${S.live?`Ceny odświeżono ${new Date(S.live.t).toLocaleTimeString('pl-PL')} (${S.live.ok} z ${S.live.n}${S.live.bad.length?'; bez ceny: '+esc(S.live.bad.join(', ')):''}).`:''}${S.twr?` Historia i TWR przeliczone ${new Date(S.twr.t).toLocaleDateString('pl-PL')}.`:' TWR jeszcze nieprzeliczony.'}`;
+}
+async function refreshLive(quiet){
+  if(!SV.ok){if(!quiet)toast('Serwer cen nie działa – '+SRVHINT());return}
+  if(SV.busy)return;
+  const syms=[...new Set(M().flatMap(A=>A.list.map(r=>r.s)))];
+  if(!syms.length)return;
+  SV.busy='live';SV.prog='';setStatus();
+  const q={},bad=[];let done=0;
+  await pool(syms,4,async s=>{
+    try{
+      const j=await api('https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(ysym(s))+'?range=5d&interval=1d',60);
+      const c=j.chart.result[0],cl=c.indicators.quote[0].close.filter(x=>x!=null);
+      const p=c.meta.regularMarketPrice??cl[cl.length-1];
+      if(!(p>0))throw 0;
+      q[s]={p,prev:cl.length>1?cl[cl.length-2]:null,cur:ycur(c.meta.currency)};
+    }catch(e){bad.push(s)}
+    SV.prog=`${++done}/${syms.length}`;setStatus();
+  });
+  const today=new Date().toISOString().slice(0,10);const seen=new Set();
+  M().forEach(A=>A.list.forEach(r=>{
+    const x=q[r.s];if(!x)return;
+    const k=curRate(x.cur)/curRate(A.a.cur),key=A.a.id+'|'+r.s,old=S.px[key];
+    const p=x.p*k;
+    if(old&&old.p>0&&Math.abs(p/old.p-1)>0.3){const m=r.s+' (cena z Yahoo odbiega >30%)';if(!bad.includes(m))bad.push(m);return}
+    S.px[key]=Object.assign({},old,{p,d:today,prev:x.prev!=null?x.prev*k:(old?old.prev:null)});
+    seen.add(r.s);
+  }));
+  S.live={t:Date.now(),ok:seen.size,n:syms.length,bad};SV.busy='';SV.prog='';
+  save();render();
+  if(!quiet)toast(`Ceny: zaktualizowano ${seen.size} z ${syms.length}${bad.length?'. Bez ceny: '+bad.slice(0,6).join(', '):''}`);
+}
+async function computeHistory(){
+  if(!SV.ok){toast('Serwer cen nie działa – '+SRVHINT());return}
+  if(SV.busy)return;
+  if(!S.lots.length)return;
+  const startMs=Math.min(...S.cash.map(e=>ms(e.d)),...S.lots.map(l=>ms(l.ot)));
+  const syms=[...new Set(S.lots.map(l=>l.s))];
+  const p1=Math.floor((startMs-10*864e5)/1000),p2=Math.floor(Date.now()/864e5+2)*86400;
+  SV.busy='hist';SV.prog='0/'+syms.length;setStatus();
+  const H={};let done=0;
+  await pool(syms,4,async s=>{
+    try{
+      const j=await api(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ysym(s))}?period1=${p1}&period2=${p2}&interval=1d&events=split`,21600);
+      const c=j.chart.result[0],ts=c.timestamp||[],cl=c.indicators.quote[0].close,d=[],v=[];
+      // Yahoo podaje ceny skorygowane o splity; XTB trzyma pozycje sprzed splitu w starych ilościach (przelicza je w dniu splitu)
+      const sp=c.events&&c.events.splits?Object.values(c.events.splits).map(x=>({d:new Date(x.date*1000).toISOString().slice(0,10),r:x.numerator/x.denominator})).filter(x=>isFinite(x.r)&&x.r>0&&x.r!==1):[];
+      ts.forEach((t,i)=>{if(cl[i]!=null){d.push(new Date(t*1000).toISOString().slice(0,10));v.push(cl[i])}});
+      if(d.length)H[s]={cur:ycur(c.meta.currency),d,v,sp};
+    }catch(e){}
+    SV.prog=`${++done}/${syms.length}`;setStatus();
+  });
+  SV.prog='kursy walut';setStatus();
+  const need=new Set();Object.values(H).forEach(h=>need.add(h.cur==='GBX'?'GBP':h.cur));
+  await fetchHist(true,[...need]);
+  try{buildTwr(H,startMs,syms)}catch(e){console.error(e);toast('Błąd przeliczania historii: '+e.message)}
+  SV.busy='';SV.prog='';save();render();
+  if(S.twr)toast(`Historia przeliczona. Brak notowań dla ${S.twr.miss.length} z ${syms.length} papierów (liczone po koszcie).`);
+}
+function buildTwr(H,startMs,syms){
+  const day0=Math.floor(startMs/864e5)*864e5,today=Math.floor(Date.now()/864e5)*864e5,N=Math.round((today-day0)/864e5)+1;
+  const keys=Array.from({length:N},(_,i)=>new Date(day0+i*864e5).toISOString().slice(0,10));
+  const ix=d=>Math.min(N-1,Math.max(0,Math.floor((ms(d)-day0)/864e5)));
+  const P={};
+  Object.entries(H).forEach(([s,h])=>{
+    const a=new Array(N).fill(null);let j=0,last=null;
+    for(let i=0;i<N;i++){while(j<h.d.length&&h.d[j]<=keys[i]){last=h.v[j];j++}a[i]=last}
+    P[s]={a,cur:h.cur,sp:h.sp||[]};
+  });
+  // Wykrywanie splitów, których Yahoo nie podaje: XTB zamyka stare pozycje i otwiera nowe z inną ilością,
+  // więc stare zakupy mają cenę ~F razy wyższą niż notowania Yahoo, a nowe zgodną.
+  const LR={},inf=[],RF=[2,3,4,5,8,10,15,20,25,30,40,50,100,200,1000],RFA=[...RF,...RF.map(f=>1/f)];
+  S.lots.forEach(l=>{const h=P[l.s],a=S.accounts.find(x=>x.id===l.a);if(!h||!a||!l.q)return;const i0=ix(l.ot),p0=h.a[i0],u=l.c/l.q;if(!(p0>0&&u>0))return;
+    const kk=hrate(h.cur,keys[i0])/hrate(a.cur,keys[i0]);(LR[l.s]=LR[l.s]||[]).push({ot:day(l.ot),ct:l.cl?day(l.ct):'9999',r:u/(p0*kk)})});
+  Object.entries(LR).forEach(([s,L])=>{
+    const near=x=>Math.abs(Math.log(x.r))<Math.log(1.5),good=L.filter(near);if(!good.length)return;
+    const g0=good.map(x=>x.ot).sort()[0],off=L.filter(x=>x.ot<g0&&!near(x));if(!off.length)return;
+    const h=P[s];if(h.sp.some(x=>x.d>off.map(y=>y.ot).sort()[0]))return;
+    const med=off.map(x=>x.r).sort((a,b)=>a-b)[Math.floor(off.length/2)],F=RFA.reduce((b,f)=>Math.abs(Math.log(med/f))<Math.abs(Math.log(med/b))?f:b,RFA[0]);
+    if(Math.abs(Math.log(med/F))<Math.log(1.25)&&off.every(x=>x.ct<=g0)){h.sp=[...h.sp,{d:g0,r:F}];inf.push(`${s} ${F>=1?'1:'+F:Math.round(1/F)+':1'} (${g0})`)}
+  });
+  const acct={},bad=new Set();
+  S.accounts.forEach(a=>{
+    const V=new Float64Array(N),Fn=new Float64Array(N),Fp=new Float64Array(N),Fc=new Float64Array(N),Fcp=new Float64Array(N),Cd=new Float64Array(N);
+    S.cash.forEach(e=>{if(e.a!==a.id)return;const i=ix(e.d);Cd[i]+=e.x;if(FLOW.has(e.t)&&e.x){Fn[i]+=e.x;Fp[i]+=flowPln(a,e)}if(CFDT.has(e.t)&&e.x){Fc[i]+=e.x;Fcp[i]+=flowPln(a,e)}});
+    let c=0;for(let i=0;i<N;i++){c+=Cd[i];V[i]=c}
+    const cf={};const conv=cur=>cf[cur]||(cf[cur]=Float64Array.from(keys,k=>hrate(cur,k)/hrate(a.cur,k)));
+    S.lots.forEach(l=>{
+      if(l.a!==a.id)return;
+      const i0=ix(l.ot),i1=l.cl?ix(l.ct):N,h=P[l.s],fb=l.q?l.c/l.q:0,k=h?conv(h.cur):null;
+      // Kontrola spójności: cena zakupu z raportu XTB vs cena z Yahoo w dniu zakupu.
+      // Yahoo podaje ceny skorygowane o splity, a XTB raz przelicza ilości, a raz nie -> dobieramy współczynnik splitu,
+      // który najlepiej pasuje. Jeśli nic nie pasuje (zły symbol, inna jednostka), pozycja liczona jest po koszcie.
+      let B=1,ok=true;
+      if(h){const p0=h.a[i0],unit=fb;
+        if(p0!=null&&p0>0&&unit>0){
+          const od=day(l.ot),c=[1];h.sp.filter(x=>x.d>od).slice(0,4).forEach(x=>{const n=c.length;for(let t=0;t<n;t++)c.push(c[t]*x.r)});
+          const ratio=unit/(p0*k[i0]);let bd=Infinity;
+          c.forEach(f=>{const dd=Math.abs(Math.log(ratio/f));if(dd<bd){bd=dd;B=f}});
+          if(bd>Math.log(2.5)){ok=false;B=1;bad.add(l.s)}
+        }}
+      for(let i=i0;i<i1;i++){const p=ok&&h&&h.a[i]!=null?h.a[i]*k[i]*B:fb;V[i]+=l.q*p}
+    });
+    const r2=arr=>Array.from(arr,x=>Math.round(x*100)/100);
+    acct[a.id]={V:r2(V),Fn:r2(Fn),Fp:r2(Fp),Fc:r2(Fc),Fcp:r2(Fcp)};
+  });
+  // dni z nietypowo dużą zmianą wartości (bez wpłat/wypłat) – do pokazania użytkownikowi
+  const diag=[];
+  S.accounts.forEach(a=>{const d=acct[a.id];let prev=0;for(let i=0;i<N;i++){const base=prev+d.Fn[i]+d.Fc[i];if(base>=50&&prev>=50){const r=d.V[i]/base-1;if(Math.abs(r)>0.25)diag.push({a:a.name,d:keys[i],r})}prev=d.V[i]}});
+  diag.sort((x,y)=>Math.abs(y.r)-Math.abs(x.r));
+  S.twr={ver:5,start:day0,n:N,t:Date.now(),acct,miss:syms.filter(s=>!H[s]),bad:[...bad],diag:diag.slice(0,8),inf};
+  TK=null;
+}
+function twrDiag(){
+  const T=S.twr;if(!T)return'';const it=[];
+  if(T.miss&&T.miss.length)it.push(`Brak notowań w Yahoo (liczone po cenie zakupu): <b>${T.miss.map(esc).join(', ')}</b>. Możesz poprawić symbol w zakładce „Ceny i instrumenty”.`);
+  if(T.bad&&T.bad.length)it.push(`Notowania niezgodne z cenami zakupu z XTB (np. inny papier pod tym symbolem) – liczone po cenie zakupu: <b>${T.bad.map(esc).join(', ')}</b>. Sprawdź „Symbol Yahoo” w zakładce „Ceny i instrumenty”.`);
+  if(T.inf&&T.inf.length)it.push(`Wykryto podział akcji, którego nie ma w danych Yahoo (uwzględniony automatycznie): ${T.inf.map(esc).join(', ')}.`);
+  if(T.diag&&T.diag.length)it.push(`Dni z bardzo dużą zmianą wartości konta (ponad 25% w jeden dzień, bez wpłat): ${T.diag.map(x=>`${esc(x.a)} ${x.d} (${x.r>0?'+':''}${(x.r*100).toFixed(0)}%)`).join(', ')}. Jeśli to nie był prawdziwy ruch rynku, zwykle chodzi o źle dobrany symbol w „Ceny i instrumenty” albo nietypową operację w raporcie XTB.`);
+  return it.length?`<div class="info" style="margin-top:8px"><b>Kontrola danych</b><br>${it.join('<br>')}</div>`:'';
+}
+let TK=null;
+function twrKeys(){if(!TK)TK=Array.from({length:S.twr.n},(_,i)=>new Date(S.twr.start+i*864e5).toISOString().slice(0,10));return TK}
+function twrOf(list,cur){
+  const T=S.twr;if(!T||!list.length)return null;
+  const N=T.n,keys=twrKeys(),V=new Array(N).fill(0),F=new Array(N).fill(0),cx=!S.opt.cfdIn;
+  for(const A of list){
+    const d=T.acct[A.a.id];if(!d)return null;
+    for(let i=0;i<N;i++){
+      if(cur){const k=hrate(A.a.cur,keys[i])/hrate(cur,keys[i]);V[i]+=d.V[i]*k;F[i]+=(d.Fp[i]+(cx&&d.Fcp?d.Fcp[i]:0))/hrate(cur,keys[i])}
+      else{V[i]+=d.V[i];F[i]+=d.Fn[i]+(cx&&d.Fc?d.Fc[i]:0)}
+    }
+  }
+  const idx=new Array(N).fill(null);let x=1,started=false,prev=0;
+  for(let i=0;i<N;i++){
+    const base=prev+F[i];
+    if(started&&base>1e-6)x*=V[i]/base;
+    if(!started&&V[i]>1e-6)started=true;
+    idx[i]=started?x:null;prev=V[i];
+  }
+  const first=idx.findIndex(v=>v!=null);if(first<0)return null;
+  const days=N-1-first;
+  const ret=n=>{const j=N-1-n;return j>=first&&idx[j]>0?idx[N-1]/idx[j]-1:null};
+  return{idx,keys,first,tot:x-1,ann:days>=30?Math.pow(x,365/days)-1:null,m1:ret(30),y1:ret(365)};
+}
+
+/* ================= Model ================= */
+function xirr(fl){
+  fl=fl.filter(f=>f.v&&isFinite(f.v)&&isFinite(f.t));if(fl.length<2)return null;
+  let t0=Infinity;fl.forEach(f=>{if(f.t<t0)t0=f.t});
+  const f=r=>fl.reduce((s,c)=>s+c.v/Math.pow(1+r,(c.t-t0)/31557600000),0);
+  let lo=-0.99,hi=100,flo=f(lo);if(flo*f(hi)>0)return null;
+  for(let i=0;i<200;i++){const m=(lo+hi)/2,fm=f(m);if(flo*fm<=0)hi=m;else{lo=m;flo=fm}}
+  return(lo+hi)/2;
+}
+const M=()=>MC||(MC=build());
+function build(){
+  const out=[];
+  S.accounts.forEach(a=>{
+    const A={a,rows:{},cash:a.cash||0,flows:[],div:0,real:0,cfd:0,cfdFl:[],posVal:0,cost:0,unreal:0,dayChg:0,prevVal:0,dayN:0,evs:[],up:0,dn:0,pos:0,neg:0};
+    S.lots.forEach(l=>{
+      if(l.a!==a.id)return;
+      const ins=S.inst[l.s]||{};
+      const r=A.rows[l.s]||(A.rows[l.s]={s:l.s,name:ins.name||l.s,cls:ins.cls||'Inne',q:0,cost:0,real:0,div:0,first:null});
+      if(l.cl){r.real+=l.re;A.real+=l.re;A.evs.push({t:ms(l.ct),x:l.re,k:'re'})}
+      else{r.q+=l.q;r.cost+=l.c;if(!r.first||l.ot<r.first)r.first=l.ot}
+    });
+    S.cash.forEach(e=>{
+      if(e.a!==a.id)return;
+      if(FLOW.has(e.t)&&e.x)A.flows.push({t:ms(e.d),x:e.x,p:flowPln(a,e),d:e.d});
+      if(CFDT.has(e.t)&&e.x){A.cfd+=e.x;A.cfdFl.push({t:ms(e.d),x:e.x,p:flowPln(a,e)})}
+      if(DIVT.has(e.t)){A.div+=e.x;A.evs.push({t:ms(e.d),x:e.x,k:'div'});if(e.s&&A.rows[e.s])A.rows[e.s].div+=e.x}
+    });
+    A.list=[];
+    Object.values(A.rows).forEach(r=>{
+      if(r.q<=1e-9)return;
+      const p=S.px[a.id+'|'+r.s];
+      r.noPx=!p;r.unit=p?p.p:r.cost/r.q;r.val=r.q*r.unit;r.pd=p?p.d:null;
+      r.pl=r.val-r.cost;r.ret=r.cost>0?r.pl/r.cost*100:null;
+      if(p&&p.prev!=null&&p.prev>0){r.dayPct=(p.p/p.prev-1)*100;r.dayChg=r.q*(p.p-p.prev);A.dayChg+=r.dayChg;A.prevVal+=r.q*p.prev;A.dayN++;if(r.dayChg>0)A.up++;else if(r.dayChg<0)A.dn++}
+      A.posVal+=r.val;A.cost+=r.cost;A.unreal+=r.pl;
+      if(r.pl>0)A.pos++;else if(r.pl<0)A.neg++;
+      A.list.push(r);
+    });
+    A.val=A.posVal+A.cash;
+    A.wk=sum(A.flows.map(f=>f.x));A.wkP=sum(A.flows.map(f=>f.p));
+    A.cfdX=S.opt.cfdIn?0:A.cfd;
+    A.profit=A.val-A.wk-A.cfdX;
+    A.asof=a.asof||new Date().toISOString().slice(0,10);
+    A.xirr=xirr([...A.flows.map(f=>({t:f.t,v:-f.x})),...(S.opt.cfdIn?[]:A.cfdFl.map(f=>({t:f.t,v:-f.x}))),{t:ms(A.asof)+43200000,v:A.val}]);
+    out.push(A);
+  });
+  return out;
+}
+// inclEx=true: także konta pominięte w podsumowaniu (do kart portfeli). Pojedyncze konto wybrane z listy pokazujemy zawsze.
+function sel(inclEx){
+  const m=M(),f=V.acc;
+  if(m.some(A=>A.a.id===f))return m.filter(A=>A.a.id===f);
+  const r=f.startsWith('cur:')?m.filter(A=>A.a.cur===f.slice(4)):f.startsWith('kind:')?m.filter(A=>A.a.kind===f.slice(5)):m;
+  return inclEx?r:r.filter(A=>!A.a.ex);
+}
+function togEx(id){const a=acc(id);a.ex=!a.ex;save();render();toast(a.ex?`„${a.name}” pominięte w podsumowaniu i TWR`:`„${a.name}” wliczane do podsumowania`)}
+function agg(list,cur){ // cur=null: waluta natywna (konta w jednej walucie)
+  const cv=(x,from)=>cur?x*curRate(from)/curRate(cur):x;
+  const T={val:0,wk:0,cfdX:0,cost:0,unreal:0,real:0,div:0,cash:0,dayChg:0,prevVal:0,dayN:0,pos:0,neg:0,up:0,dn:0,fl:[],n:list.length};
+  list.forEach(A=>{
+    const c=A.a.cur;
+    T.val+=cv(A.val,c);T.cost+=cv(A.cost,c);T.unreal+=cv(A.unreal,c);T.real+=cv(A.real,c);T.div+=cv(A.div,c);T.cash+=cv(A.cash,c);
+    T.dayChg+=cv(A.dayChg,c);T.prevVal+=cv(A.prevVal,c);T.dayN+=A.dayN;T.pos+=A.pos;T.neg+=A.neg;T.up+=A.up;T.dn+=A.dn;
+    T.wk+=cur?A.wkP/curRate(cur):A.wk;
+    if(!S.opt.cfdIn){T.cfdX+=cur?sum(A.cfdFl.map(f=>f.p))/curRate(cur):A.cfd;A.cfdFl.forEach(f=>T.fl.push({t:f.t,v:-(cur?f.p/curRate(cur):f.x)}))}
+    A.flows.forEach(f=>T.fl.push({t:f.t,v:-(cur?f.p/curRate(cur):f.x)}));
+  });
+  T.profit=T.val-T.wk-T.cfdX;T.rate=T.wk>0?T.profit/T.wk*100:null;
+  T.dayPct=T.dayN&&T.val-T.dayChg>0?T.dayChg/(T.val-T.dayChg)*100:null;
+  const asof=list.length?Math.max(...list.map(A=>ms(A.asof))):Date.now();
+  T.xirr=xirr([...T.fl,{t:asof+43200000,v:T.val}]);
+  T.tw=twrOf(list,cur);
+  return T;
+}
+function period(list,cur,days,kind){
+  const lim=days==null?-Infinity:Date.now()-days*864e5;
+  let s=0;list.forEach(A=>A.evs.forEach(e=>{if(e.t>=lim&&(!kind||e.k===kind))s+=e.x*(cur?curRate(A.a.cur)/curRate(cur):1)}));
+  return s;
+}
+
+/* ================= xlsx w przeglądarce ================= */
+async function unzip(buf){
+  const u8=new Uint8Array(buf),dv=new DataView(buf);
+  let e=u8.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;
+  if(e<0)throw new Error('to nie jest plik xlsx');
+  const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const files={};
+  for(let i=0;i<n;i++){
+    const method=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cm=dv.getUint16(p+32,true),lho=dv.getUint32(p+42,true);
+    const name=new TextDecoder().decode(u8.subarray(p+46,p+46+nl));p+=46+nl+el+cm;
+    const ds=lho+30+dv.getUint16(lho+26,true)+dv.getUint16(lho+28,true);
+    files[name]={method,data:u8.subarray(ds,ds+cs)};
+  }
+  return files;
+}
+async function inflate(f){
+  if(f.method===0)return f.data;
+  const s=new Blob([f.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(s).arrayBuffer());
+}
+async function readXlsx(buf){
+  const z=await unzip(buf),dec=new TextDecoder();
+  const txt=async n=>z[n]?dec.decode(await inflate(z[n])):'';
+  const dom=s=>new DOMParser().parseFromString(s,'application/xml');
+  const wb=dom(await txt('xl/workbook.xml')),rel=dom(await txt('xl/_rels/workbook.xml.rels'));
+  const rm={};rel.querySelectorAll('Relationship').forEach(r=>rm[r.getAttribute('Id')]=r.getAttribute('Target'));
+  const sst=[];dom(await txt('xl/sharedStrings.xml')).querySelectorAll('si').forEach(si=>sst.push(si.textContent));
+  const st=dom(await txt('xl/styles.xml')),fm={};
+  st.querySelectorAll('numFmt').forEach(n=>fm[n.getAttribute('numFmtId')]=n.getAttribute('formatCode'));
+  const isDateFmt=id=>{id=+id;if((id>=14&&id<=22)||(id>=27&&id<=36)||(id>=45&&id<=47)||(id>=50&&id<=58))return true;const c=fm[id];return c?/[dmyhs]/i.test(c.replace(/"[^"]*"|\[[^\]]*\]|\\./g,'')):false};
+  const xfs=[...st.querySelectorAll('cellXfs > xf')].map(x=>isDateFmt(x.getAttribute('numFmtId')));
+  const sheets={};
+  for(const s of wb.querySelectorAll('sheet')){
+    let t=rm[s.getAttribute('r:id')]||'';t=t.replace(/^\//,'');if(!t.startsWith('xl/'))t='xl/'+t;
+    const rows=[];
+    dom(await txt(t)).querySelectorAll('row').forEach(row=>{
+      const r=[];
+      row.querySelectorAll('c').forEach(c=>{
+        const ref=c.getAttribute('r')||'';let col=0;for(const ch of ref.replace(/\d+/,''))col=col*26+ch.charCodeAt(0)-64;col--;
+        const ty=c.getAttribute('t'),v=c.querySelector('v');let val='';
+        if(ty==='s')val=sst[+v.textContent]??'';
+        else if(ty==='inlineStr')val=c.textContent;
+        else if(v){
+          if(ty==='str'||ty==='e')val=v.textContent;
+          else{val=parseFloat(v.textContent);const si=c.getAttribute('s');if(si!=null&&xfs[+si])val=new Date(Math.round((val-25569)*864e5)).toISOString().slice(0,19).replace('T',' ')}
+        }
+        while(r.length<col)r.push('');r[col]=val;
+      });
+      rows.push(r);
+    });
+    sheets[s.getAttribute('name')]=rows;
+  }
+  return sheets;
+}
+
+/* ================= Parser raportu XTB ================= */
+const isD=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(v);
+const numv=v=>typeof v==='number'?v:parseFloat(String(v).replace(',','.'))||0;
+function table(rows,first){ // znajdź wiersz nagłówka zaczynający się od kolumny `first`
+  const i=rows.findIndex(r=>String(r[0]).trim()===first);
+  if(i<0)return null;
+  const h=rows[i].map(x=>String(x).trim().toLowerCase());
+  return{h,rows:rows.slice(i+1),ix:n=>h.indexOf(n)};
+}
+function parseXtb(sheets,fname){
+  const C=sheets['Cash Operations'],CL=sheets['Closed Positions'],OP=sheets['Open Positions'];
+  if(!C&&!CL)return null;
+  const meta=(rows,k)=>{const r=(rows||[]).find(r=>String(r[0]).trim()===k);return r?r[1]:''};
+  const num=String(meta(C||CL,'Account number')||'');
+  const out={num,fname,lots:[],cash:[],px:{},inst:{},warn:[],cfd:0};
+  out.from=day(meta(C||CL,'Date from (UTC)'));out.to=day(meta(C||CL,'Date to (UTC)'));
+  const asofRaw=meta(OP,'Data as of report generated');
+  out.asof=isD(asofRaw)?day(asofRaw):out.to;
+  const clsOf=c=>({STOCK:'Akcje',ETF:'ETF',CFD:'CFD'})[String(c).toUpperCase()]||'Inne';
+  let product='';
+  // zamknięte pozycje
+  const tc=CL&&table(CL,'Instrument');
+  if(tc){
+    const I=n=>tc.ix(n);
+    tc.rows.forEach(r=>{
+      const s=String(r[I('ticker')]||'').trim(),ot=r[I('open time (utc)')],ct=r[I('close time (utc)')];
+      if(!s||!isD(ot)||!isD(ct))return;
+      if(String(r[I('category')]).toUpperCase()==='CFD'){out.cfd++;return}
+      if(String(r[I('type')]).toUpperCase()!=='BUY'){out.warn.push('pominięto pozycję krótką '+s);return}
+      const c=numv(r[I('purchase value')]),re=numv(r[I('profit/loss')]);
+      product=product||r[I('product')];
+      out.lots.push({s,q:numv(r[I('volume')]),op:numv(r[I('open price')]),ot,cp:numv(r[I('close price')]),ct,c,pr:c+re,re,cl:true,pid:String(r[I('position id')]||'')});
+      out.inst[s]={name:String(r[I('instrument')]||s).replace(/_/g,' '),cls:clsOf(r[I('category')])};
+    });
+  }
+  // otwarte pozycje + ceny
+  let cur='';
+  const sm=OP&&table(OP,'Product');
+  if(OP){
+    const hi=OP.findIndex(r=>String(r[0]).trim()==='Product'&&String(r[1]).trim()==='Metric');
+    if(hi>=0)for(let i=hi+1;i<OP.length&&/open position/i.test(String(OP[i][1]||''));i++){if(/^[A-Za-z]{3}$/.test(String(OP[i][3]||'').trim()))cur=cur||String(OP[i][3]).trim().toUpperCase()}
+    const to=table(OP,'Product');
+    const t2=OP.findIndex(r=>String(r[0]).trim()==='Product'&&String(r[1]).trim()==='Instrument/Position');
+    if(t2>=0){
+      const h=OP[t2].map(x=>String(x).trim().toLowerCase()),I=n=>h.indexOf(n);
+      const tot={};let gcat='';
+      OP.slice(t2+1).forEach(r=>{
+        if(!r[0])return;
+        const s=String(r[I('ticker')]||'').trim();if(!s)return;
+        const ty=String(r[I('type')]||'').toUpperCase();
+        if(ty===''){gcat=String(r[I('category')]).toUpperCase();if(gcat!=='CFD')out.inst[s]=Object.assign(out.inst[s]||{},{name:String(r[I('instrument/position')]||s).replace(/_/g,' '),cls:clsOf(gcat)});return}
+        if(gcat==='CFD'){out.cfd++;return}
+        if(ty!=='BUY'){out.warn.push('pominięto otwartą pozycję krótką '+s);return}
+        product=product||r[0];
+        const q=numv(r[I('volume')]),v=numv(r[I('value')]);
+        const net=r[I('net profit')];
+        out.lots.push({s,q,op:numv(r[I('open price')]),ot:r[I('open time (utc)')],c:v-numv(net),cl:false,pid:String(r[I('instrument/position')])});
+        const t=tot[s]||(tot[s]={q:0,v:0});t.q+=q;t.v+=v;
+      });
+      Object.entries(tot).forEach(([s,t])=>{if(t.q>0)out.px[s]=t.v/t.q});
+    }
+  }
+  // operacje gotówkowe
+  const tk=C&&table(C,'Type');
+  if(tk){
+    const I=n=>tk.ix(n);let total=null,s2=0;
+    tk.rows.forEach(r=>{
+      const ty=String(r[0]).trim();
+      if(ty==='Total'){total=numv(r[I('amount')]);return}
+      const d=r[I('time')];if(!ty||!isD(d))return;
+      const x=numv(r[I('amount')]);s2+=x;product=product||r[I('product')];
+      out.cash.push({d,t:ty,s:String(r[I('ticker')]||'').trim(),x,m:String(r[I('comment')]||'').slice(0,110)});
+    });
+    const KNOWN=new Set([...FLOW,...DIVT,...CFDT,'Stock purchase','Stock sell','Free funds interest','Free funds interest tax','SEC fee','Correction']);
+    const unk={};out.cash.forEach(e=>{if(!KNOWN.has(e.t))unk[e.t]=(unk[e.t]||0)+1});
+    Object.entries(unk).forEach(([t,n])=>out.warn.push(`nieznany typ operacji „${t}” (${n}×) – liczony jako zysk/strata; jeśli to wpłata lub przelew, wynik może być zawyżony/zaniżony`));
+    out.cashBal=total!=null?total:s2;
+    out.cashSum=s2;
+  }
+  // rodzaj i waluta konta
+  const fn=(fname||'').toUpperCase().match(/^(IKZE|IKE|[A-Z]{3})[_\s-]/);
+  const pr=String(product||'').toUpperCase();
+  out.kind=pr==='IKZE'||(fn&&fn[1]==='IKZE')?'IKZE':pr==='IKE'||(fn&&fn[1]==='IKE')?'IKE':'Zwykłe';
+  out.cur=cur||(out.kind!=='Zwykłe'?'PLN':(fn&&fn[1].length===3&&!['IKE'].includes(fn[1])?fn[1]:'PLN'));
+  out.name=out.kind==='Zwykłe'?'XTB '+out.cur:out.kind;
+  if(out.cashSum!=null&&Math.abs(out.cashBal-out.cashSum)>0.05)out.warn.push('saldo gotówki różni się od sumy operacji');
+  return out;
+}
+
+/* ================= Import ================= */
+let IM={items:[],busy:false,msg:''};
+async function loadFiles(list){
+  if(typeof DecompressionStream==='undefined'){toast('Ta przeglądarka jest za stara – użyj aktualnego Chrome, Edge lub Firefox');return}
+  const files=[...list].filter(f=>/\.xlsx$/i.test(f.name)&&!f.name.startsWith('~$'));
+  if(!files.length){toast('Nie znaleziono plików .xlsx');return}
+  IM.busy=true;IM.msg='';render();
+  const items=[];
+  for(const f of files){
+    try{
+      const p=parseXtb(await readXlsx(await f.arrayBuffer()),f.name);
+      if(!p||!p.num){items.push({err:f.name+': to nie jest raport XTB (brak zakładek Cash Operations / Closed Positions)'});continue}
+      items.push(p);
+    }catch(e){items.push({err:f.name+': '+e.message})}
+  }
+  items.forEach(p=>{
+    if(p.err){IM.items.push(p);return}
+    const i=IM.items.findIndex(x=>!x.err&&x.num===p.num);
+    if(i>=0)IM.items[i]=p;else IM.items.push(p);
+  });
+  IM.busy=false;render();
+}
+function dropItem(i){IM.items.splice(i,1);render()}
+function importAll(){
+  let n=0;
+  IM.items.filter(p=>!p.err).forEach(p=>{
+    let a=S.accounts.find(x=>x.num===p.num);
+    if(!a){a={id:uid(),name:p.name,kind:p.kind,cur:p.cur,num:p.num};S.accounts.push(a)}
+    else{a.kind=p.kind;a.cur=p.cur}
+    a.asof=p.asof;a.from=p.from;a.to=p.to;a.cash=p.cashBal||0;a.imported=new Date().toISOString().slice(0,16).replace('T',' ');
+    S.lots=S.lots.filter(l=>l.a!==a.id);S.cash=S.cash.filter(e=>e.a!==a.id);
+    p.lots.forEach(l=>S.lots.push(Object.assign({a:a.id},l)));
+    p.cash.forEach(e=>S.cash.push(Object.assign({a:a.id},e)));
+    Object.entries(p.inst).forEach(([s,i])=>{const o=S.inst[s]||{};S.inst[s]={name:o.userName||i.name||o.name||s,cls:o.userCls||i.cls||o.cls||'Inne',userName:o.userName,userCls:o.userCls}});
+    const open=new Set(p.lots.filter(l=>!l.cl).map(l=>l.s));
+    Object.keys(S.px).filter(k=>k.startsWith(a.id+'|')&&!open.has(k.slice(a.id.length+1))).forEach(k=>delete S.px[k]);
+    Object.entries(p.px).forEach(([s,v])=>{
+      const k=a.id+'|'+s,o=S.px[k];
+      if(o&&o.d<p.asof)S.px[k]={p:v,d:p.asof,prev:o.p,pd:o.d};
+      else if(o&&o.d===p.asof)S.px[k]=Object.assign({},o,{p:v});
+      else if(o&&o.d>p.asof)S.px[k]=o;
+      else S.px[k]={p:v,d:p.asof};
+    });
+    n++;
+  });
+  IM.items=[];save();V.tab='dash';V.acc='all';render();
+  toast(`Zaimportowano ${n} kont. Pobieram kursy NBP…`);
+  S.twr=null;
+  fetchNBP(true).then(()=>SV.ok?refreshLive(true).then(()=>computeHistory()):fetchHist(true));
+}
+
+/* ================= Wykresy ================= */
+function donut(items,fmtLabel){
+  items=items.filter(i=>i.value>0.005).sort((a,b)=>b.value-a.value);
+  const total=sum(items.map(i=>i.value));
+  if(!total)return'<div class="mut">Brak danych</div>';
+  if(items.length>10){const rest=items.splice(9);items.push({label:'Pozostałe',value:sum(rest.map(r=>r.value))})}
+  let off=25;
+  const segs=items.map((it,i)=>{const p=it.value/total*100;const s=`<circle r="15.9155" cx="21" cy="21" fill="none" stroke="${COL[i%10]}" stroke-width="9" stroke-dasharray="${p} ${100-p}" stroke-dashoffset="${off}"/>`;off-=p;return s}).join('');
+  const txt=items.map((it,i)=>{const mid=(items.slice(0,i).reduce((s,x)=>s+x.value,0)+it.value/2)/total*2*Math.PI-Math.PI/2;const p=it.value/total*100;return p>=4?`<text x="${21+Math.cos(mid)*15.9}" y="${21.8+Math.sin(mid)*15.9}" text-anchor="middle" style="font-size:2.2px;fill:#fff">${fmt(p,2)}%</text>`:''}).join('');
+  const leg=items.map((it,i)=>`<div><i style="background:${COL[i%10]}"></i><span>${esc(fmtLabel?fmtLabel(it,it.value/total*100):it.label+' – '+fmt(it.value/total*100,2)+' %')}</span></div>`).join('');
+  return`<div class="dn"><svg viewBox="0 0 42 42">${segs}${txt}</svg><div class="leg">${leg}</div></div>`;
+}
+const MON=['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+function niceTicks(lo,hi,n){
+  const span=(hi-lo)||1,raw=span/n,pw=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/pw;
+  const st=(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*pw,a=Math.floor(lo/st+1e-9)*st,b=Math.ceil(hi/st-1e-9)*st,t=[];
+  for(let v=a;v<=b+st/2;v+=st)t.push(Math.round(v/st)*st);
+  return{t,st};
+}
+function lineChart(series,o){
+  o=o||{};
+  series=series.filter(s=>s.pts.length);
+  if(!series.length)return'<div class="mut">Za mało danych do wykresu</div>';
+  const W=640,H=250,L=56,R=16,T=10,B=26;
+  const all=series.flatMap(s=>s.pts);
+  const x0=Math.min(...all.map(p=>p[0])),x1=Math.max(...all.map(p=>p[0]),x0+864e5);
+  const yt=niceTicks(Math.min(0,...all.map(p=>p[1])),Math.max(...all.map(p=>p[1]),1),5);
+  const y0=yt.t[0],y1=yt.t[yt.t.length-1];
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R),Y=y=>T+(1-(y-y0)/(y1-y0))*(H-T-B);
+  let g='';
+  yt.t.forEach(v=>{const y=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="${v===0&&o.pct?'#8895ab':'#e2e5ec'}"/><text x="${L-5}" y="${y+3}" text-anchor="end">${o.pct?fmt(v,yt.st<1?1:0)+'%':(yt.st>=1000?fmt(v/1000,yt.st%1000?1:0)+'k':fmt(v,0))}</text>`});
+  const months=(x1-x0)/(30.44*864e5),stepM=[1,2,3,6,12,24].find(m=>months/m<=6)||36;
+  const d0=new Date(x0);let y=d0.getUTCFullYear(),m=d0.getUTCMonth();
+  if(Date.UTC(y,m,1)<x0)m++;m=Math.ceil(m/stepM)*stepM;
+  for(;;m+=stepM){const t=Date.UTC(y,m,1);if(t>x1)break;const dd=new Date(t),px=X(t);
+    g+=`<line x1="${px}" x2="${px}" y1="${H-B}" y2="${H-B+4}" stroke="#8895ab"/><text x="${px}" y="${H-8}" text-anchor="${px<L+22?'start':px>W-R-22?'end':'middle'}">${MON[dd.getUTCMonth()]} ${dd.getUTCFullYear()}</text>`}
+  const paths=series.map(s=>{
+    let d='';
+    s.pts.forEach((p,i)=>{d+=i?(s.step?`H${X(p[0]).toFixed(1)}V${Y(p[1]).toFixed(1)}`:`L${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`):`M${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`});
+    const dots=s.dots?s.pts.map(p=>`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="3" fill="${s.color}"/>`).join(''):'';
+    return`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" ${s.dash?'stroke-dasharray="5 4"':''} stroke-linejoin="round"/>${dots}`;
+  }).join('');
+  const leg=series.map(s=>`<span style="margin-right:14px"><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${s.color};margin-right:5px"></i>${s.name}</span>`).join('');
+  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}${paths}</svg><div class="note" style="text-align:center">${leg}</div>`;
+}
+function mix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const A=p(a),B=p(b);return'#'+A.map((x,i)=>Math.round(x+(B[i]-x)*t).toString(16).padStart(2,'0')).join('')}
+function tm(items,x,y,w,h,out){
+  if(!items.length)return;
+  if(items.length===1){out.push(Object.assign({},items[0],{x,y,w,h}));return}
+  const tot=sum(items.map(i=>i.v));let a=0,k=0;
+  while(k<items.length-1&&a+items[k].v<=tot/2)a+=items[k++].v;
+  if(k===0){a=items[0].v;k=1}
+  const fa=a/tot;
+  if(w>=h){tm(items.slice(0,k),x,y,w*fa,h,out);tm(items.slice(k),x+w*fa,y,w*(1-fa),h,out)}
+  else{tm(items.slice(0,k),x,y,w,h*fa,out);tm(items.slice(k),x,y+h*fa,w,h*(1-fa),out)}
+}
+function heat(items,total){
+  items=items.filter(i=>i.v>0).sort((a,b)=>b.v-a.v);
+  if(!items.length)return'<div class="mut">Brak danych</div>';
+  const tot=total>0?total:(items.reduce((s,i)=>s+i.v,0)||1);
+  const o=[];tm(items,0,0,100,100,o);
+  return`<div class="tm">${o.map(b=>{const sh=b.v/tot*100;const t=Math.max(-1,Math.min(1,(b.ret||0)/40));const c=t>=0?mix('#cfeccf','#00b300',t):mix('#f9d6d6','#d10000',-t);return`<div class="${b.w<12||b.h<10?'sm':''}" title="${esc(b.l)}: stopa ${pc(b.ret)}, udział ${fmt(sh,2)} % portfela" style="left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%;background:${c}"><span>${esc(b.l)}</span><span>${pc(b.ret)}</span><span class="sh">${fmt(sh,2)} %</span></div>`}).join('')}</div>`;
+}
+function timeline(list){
+  const ev=[];
+  list.forEach(A=>{
+    S.cash.forEach(e=>{if(e.a===A.a.id)ev.push({t:ms(e.d),a:A.a,dc:e.x,dk:0,fp:FLOW.has(e.t)?flowPln(A.a,e):0,d:day(e.d)})});
+    S.lots.forEach(l=>{
+      if(l.a!==A.a.id||(S.inst[l.s]||{}).cls==='CFD')return;
+      ev.push({t:ms(l.ot),a:A.a,dc:0,dk:l.c,fp:0,d:day(l.ot)});
+      if(l.cl)ev.push({t:ms(l.ct),a:A.a,dc:0,dk:-l.c,fp:0,d:day(l.ct)});
+    });
+  });
+  ev.sort((x,y)=>x.t-y.t);
+  const st={};let wk=0;const cost=[],wkl=[];
+  const push=d=>{
+    let v=0;Object.values(st).forEach(s=>{v+=(s.c+s.k)*hrate(s.a.cur,d)});
+    const t=ms(d);cost.push([t,v]);wkl.push([t,wk]);
+  };
+  let last=null;
+  ev.forEach(e=>{
+    if(last&&e.d!==last)push(last);
+    const s=st[e.a.id]||(st[e.a.id]={a:e.a,c:0,k:0});s.c+=e.dc;s.k+=e.dk;wk+=e.fp;last=e.d;
+  });
+  if(last)push(last);
+  return{cost,wk:wkl};
+}
+
+/* ================= Widoki ================= */
+const TABS=[['dash','Kokpit'],['inv','Inwestycje'],['led','Transakcje'],['imp','Import raportów XTB'],['acc','Konta'],['px','Ceny i instrumenty'],['set','Ustawienia']];
+function render(){
+  if(!CUR){showLogin();return}
+  document.getElementById('login').style.display='none';
+  document.getElementById('usr').innerHTML=`<button class="btn sec" onclick="event.stopPropagation();toggleMenu()" title="Menu profilu">👤 <b>${esc(ME().name)}</b> ▾</button><div class="um" id="um" style="display:none"><button onclick="openRename()">✏️ Zmień nazwę profilu</button><button onclick="openPw()">${ME().hash?'🔑 Zmień / usuń hasło':'🔒 Ustaw hasło'}</button><button onclick="logout()">↩ Wyloguj</button><hr><button class="dg" onclick="openDel()">🗑 Usuń profil…</button></div>`;
+  MC=MC;
+  const nav=document.getElementById('nav');
+  nav.innerHTML=TABS.map(([k,n])=>`<button class="${V.tab===k?'on':''}" onclick="go('${k}')">${n}</button>`).join('');
+  const f=document.getElementById('flt');
+  let o='<option value="all">Wszystkie konta</option>';
+  
+  
+  [...S.accounts].sort((x,y)=>({IKE:0,IKZE:1}[x.kind]??2)-({IKE:0,IKZE:1}[y.kind]??2)).forEach(a=>o+=`<option value="${a.id}">${esc(a.name)} (${a.cur})${a.ex?' – pominięte':''}</option>`);
+  f.innerHTML=o;f.value=[...f.options].some(x=>x.value===V.acc)?V.acc:(V.acc='all');
+  f.onchange=()=>{V.acc=f.value;render()};
+  document.getElementById('tk').innerHTML=`<span title="${SV.ok?'Serwer cen działa':'Brak cen na żywo – '+SRVHINT()}">${SV.ok?'<b style="color:#2a7d00;cursor:default">● ceny na żywo</b>':'○ offline'}</span>`+['USD','EUR','GBP','CHF'].map(c=>`<span>${c} <b onclick="go('set')" title="Zmień w Ustawieniach">${fmt(S.fx[c],4)}</b></span>`).join('');
+  document.body.classList.toggle('hide',!!S.opt.hide);
+  document.getElementById('app').innerHTML=({dash:vDash,inv:vInv,led:vLed,imp:vImp,acc:vAcc,px:vPx,set:vSet})[V.tab]();
+}
+function go(t){V.tab=t;render();scrollTo(0,0)}
+const noData=()=>`<div class="card empty"><h2>Zacznij od zaimportowania raportów z XTB</h2><p class="mut">Wybierz pliki .xlsx (Cash Operations, Closed Positions, Open Positions) albo cały folder z pobranymi raportami – konta (IKE, IKZE, PLN, EUR, USD) zostaną utworzone automatycznie.</p><button class="btn" onclick="go('imp')">Import raportów XTB</button></div>`;
+
+const tile=(l,v,c='')=>`<div class="tl"><span class="l">${l}</span><b class="v ${c}">${v}</b></div>`;
+function summary(title,T,cur,note){
+  const c=cur||'';
+  const rate=`<div class="tl two"><div><span class="l">Stopa</span><b class="v ${cl(T.tw?T.tw.tot:T.rate)}" style="font-size:19px">${pc(T.tw?T.tw.tot*100:T.rate)}</b></div><div><span class="l">Śr. roczna stopa</span><b class="v ${cl(T.tw?T.tw.ann:T.xirr)}" style="font-size:19px">${(T.tw?T.tw.ann:T.xirr)==null?'–':pc((T.tw?T.tw.ann:T.xirr)*100)}</b></div></div>`;
+  return`<div class="card"><h2>${title}${note?`<small>${note}</small>`:''}</h2><div class="g3">
+   ${tile('Wartość',big(T.val))}
+   ${tile('Zmiana dzienna',T.dayPct==null?'–':pc(T.dayPct),cl(T.dayPct))}
+   ${tile('Zysk całkowity',big(T.profit),cl(T.profit))}
+   ${rate}
+   ${tile('Zysk dzienny',T.dayN?sg(T.dayChg):'–',cl(T.dayChg))}
+   ${tile('Zysk bieżący',big(T.unreal),cl(T.unreal))}
+   ${tile('Wkład własny',big(T.wk))}
+   ${tile('Walory na plusie',T.pos,'pos')}
+   ${tile('Walory na minusie',T.neg,T.neg?'neg':'')}
+  </div></div>`;
+}
+function vDash(){
+  const list=sel();
+  if(!S.accounts.length)return noData();
+  const cur=S.opt.cur,T=agg(list,cur);
+  const curs=[...new Set(list.map(A=>A.a.cur))];
+  const ck=(k,l)=>`<label class="ck"><input type="checkbox" ${S.opt[k]?'checked':''} onchange="S.opt.${k}=this.checked;save();render()"> ${l}</label>`;
+  const hasHist=Object.keys(S.fxh).length>0;
+  let h=`<div class="card set"><h2>Kokpit</h2>
+    <label>Przelicz podsumowanie na walutę</label>
+    <select onchange="S.opt.cur=this.value;save();render()">${['PLN','USD','EUR','GBP','CHF'].map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('')}</select>
+    ${ck('percur','Pokaż podsumowania portfeli per waluta')}
+    ${ck('cfdIn','Wliczaj wyniki CFD (zamknięte pozycje CFD, swap) do zysku i stopy zwrotu – domyślnie pomijane')}
+    ${ck('round','Formatuj duże wartości z zaokrągleniem do tysięcy/milionów')}
+    ${ck('hide','Ukryj wartości')}
+    <label>Notowania na żywo i historia</label>
+    <div class="note" id="svs">${statusText()}</div>
+    <div class="row"><button class="btn" onclick="refreshLive()">Odśwież ceny teraz</button><button class="btn sec" onclick="computeHistory()">Przelicz historię i TWR</button></div>
+    ${ck('auto','Odświeżaj ceny automatycznie co 5 minut (gdy działa serwer)')}
+    ${hasHist?'':`<div class="note">Wkład własny w innych walutach liczony po bieżących kursach – pobierz historyczne kursy NBP w Ustawieniach, żeby był dokładny.</div>`}
+  </div>`;
+  h+=summary(`Podsumowanie portfeli w przeliczeniu na ${cur}`,T,cur);
+  if(S.opt.percur&&curs.length>0&&!(curs.length===1&&curs[0]===cur))curs.forEach(c=>{h+=summary(`Podsumowanie portfeli w ${c}`,agg(list.filter(A=>A.a.cur===c),null),c)});
+  // portfele
+  h+=`<div class="card"><h2>Portfele</h2><div class="pf">${sel(true).map(A=>{
+    const T1=agg([A],null),r12=period([A],null,365,'re'),d12=period([A],null,365,'div');
+    return`<div class="pc ${A.a.ex?'ex':''}"><h4>${esc(A.a.name)}<span>${A.a.kind}${A.a.ex?' · pominięte':''}</span></h4><div class="big v">${big(A.val)} ${A.a.cur}</div>
+     <span class="bdg ${cl(T1.tw?T1.tw.tot:T1.rate)||'pos'}">${pc(T1.tw?T1.tw.tot*100:T1.rate)}</span><div class="sub v ${cl(A.profit)}">${sg(A.profit)} ${A.a.cur}</div><hr>
+     <div class="r"><span>Zmiana dzienna</span><span class="bdg ${cl(T1.dayPct)||'pos'}">${pc(T1.dayPct)}</span></div>
+     ${T1.tw?`<div class="r"><span>Ostatnie 30 dni</span><span class="bdg ${cl(T1.tw.m1)||'pos'}">${T1.tw.m1==null?'–':pc(T1.tw.m1*100)}</span></div><div class="r"><span>Ostatnie 12 miesięcy</span><span class="bdg ${cl(T1.tw.y1)||'pos'}">${T1.tw.y1==null?'–':pc(T1.tw.y1*100)}</span></div>`:''}
+     <div class="r"><span>Zysk zrealizowany (12 mies.)</span><b class="v ${cl(r12)}">${sg(r12)}</b></div>
+     <div class="r"><span>Dywidendy (12 mies.)</span><b class="v ${cl(d12)}">${sg(d12)}</b></div>
+     <div class="r"><span>Śr. roczna stopa</span><span class="bdg ${cl(T1.tw?T1.tw.ann:A.xirr)||'pos'}">${(T1.tw?T1.tw.ann:A.xirr)==null?'–':pc((T1.tw?T1.tw.ann:A.xirr)*100)}</span></div>
+     <label class="exl" title="Odznacz, aby konto nie było liczone w sumach, wykresach i TWR całego portfela"><input type="checkbox" ${A.a.ex?'':'checked'} onchange="togEx('${A.a.id}')"> Wliczaj do podsumowania i TWR</label></div>`}).join('')}</div>
+    <div class="btns"><button class="btn" onclick="exportPos()">Eksport pozycji do csv</button></div></div>`;
+  h+=`<div class="card"><h2>Udział wartości portfeli w sumie inwestycji</h2>${donut(list.map(A=>({label:A.a.name,value:A.val*curRate(A.a.cur),a:A})),(it,p)=>`${it.label} (${fmt(it.a.val,0)} ${it.a.a.cur}, ${fmt(p,2)} %)`)}</div>`;
+  if(S.twr){
+    const mk=t=>t.idx.map((v,j)=>v==null?null:[S.twr.start+j*864e5,(v-1)*100]).filter(Boolean);
+    const ser=list.map((A,i)=>{const t=twrOf([A],null);return t?{name:A.a.name,color:COL[i%10],pts:mk(t)}:null}).filter(Boolean);
+    const tt=twrOf(list,'PLN');if(tt&&list.length>1)ser.unshift({name:'Razem (w zł)',color:'#111',pts:mk(tt)});
+    h+=`<div class="card"><h2>Stopa zwrotu portfeli w czasie <small>TWR, %</small></h2>${lineChart(ser,{pct:true})}<div class="note">Wartość portfela odtworzona dzień po dniu z historii notowań Yahoo Finance; pozycje bez notowań liczone po koszcie.</div>${twrDiag()}</div>`;
+  }
+  const tl=timeline(list);
+  const series=[{name:'Wkład własny (w zł)',pts:tl.wk,color:COL[2],step:true},{name:'Wartość po koszcie + gotówka (w zł)',pts:tl.cost,color:COL[1]}];
+  if(tl.cost.length){const lc=tl.cost[tl.cost.length-1];series.push({name:'Wartość rynkowa dziś (w zł)',pts:[lc,[Date.now(),agg(list,'PLN').val]],color:COL[3],dash:true,dots:true})}
+  h+=`<div class="card"><h2>Wkład własny i wartość w czasie</h2><div class="info">Wykres pokazuje wkład oraz wartość po koszcie zakupu (z gotówką); ostatni punkt to wartość rynkowa. ${S.twr?'„Stopa” i „Śr. roczna stopa” to TWR liczony z historii notowań (jak w myfund).':'Bez historii notowań „Stopa” to zysk/wkład, a „Śr. roczna stopa” to XIRR – włącz serwer cen i kliknij „Przelicz historię i TWR”, aby liczyć TWR.'}</div>${lineChart(series)}</div>`;
+  const items=[];list.forEach(A=>A.list.forEach(r=>items.push({l:r.s,v:r.val*curRate(A.a.cur),ret:r.ret})));
+  const merged={};items.forEach(i=>{const m=merged[i.l]||(merged[i.l]={l:i.l,v:0,cost:0});m.v+=i.v;});
+  list.forEach(A=>A.list.forEach(r=>{merged[r.s].cost+=r.cost*curRate(A.a.cur)}));
+  Object.values(merged).forEach(m=>m.ret=m.cost>0?(m.v/m.cost-1)*100:null);
+  h+=`<div class="card"><h2>Mapa cieplna pozycji</h2><div class="info">Wielkość kafelka = wartość pozycji, liczba w lewym górnym rogu = udział w wartości wszystkich pozycji (tak jak w „Udział pozycji” i tabeli w Inwestycjach), kolor = stopa zwrotu od zakupu (zielony – zysk, czerwony – strata).</div>${heat(Object.values(merged))}</div>`;
+  return h;
+}
+
+function mergedRows(list,cur){
+  const m={};
+  list.forEach(A=>A.list.forEach(r=>{
+    const f=cur?curRate(A.a.cur)/curRate(cur):1;
+    const x=m[r.s]||(m[r.s]={s:r.s,name:r.name,cls:r.cls,q:0,cost:0,val:0,real:0,div:0,first:null,pd:null,dayChg:0,prevV:0,dayN:0,noPx:false});
+    x.q+=r.q;x.cost+=r.cost*f;x.val+=r.val*f;x.real+=r.real*f;x.div+=r.div*f;
+    if(!x.first||r.first<x.first)x.first=r.first;
+    if(r.noPx)x.noPx=true;
+    if(r.pd&&(!x.pd||r.pd>x.pd))x.pd=r.pd;
+    if(r.dayChg!=null){x.dayChg+=r.dayChg*f;x.prevV+=(r.val-r.dayChg)*f;x.dayN++}
+  }));
+  return Object.values(m).map(x=>{x.pl=x.val-x.cost;x.ret=x.cost>0?x.pl/x.cost*100:null;x.avg=x.q?x.cost/x.q:0;x.unit=x.q?x.val/x.q:0;x.dayPct=x.dayN&&x.prevV>0?x.dayChg/x.prevV*100:null;return x});
+}
+function vInv(){
+  const list=sel();if(!S.accounts.length)return noData();
+  const same=new Set(list.map(A=>A.a.cur));
+  const cur=same.size===1&&S.opt.cur==='native'?[...same][0]:S.opt.cur;
+  const natural=same.size===1?[...same][0]:null;
+  const curSel=natural&&(S.opt.cur===natural)?natural:S.opt.cur;
+  const rows=mergedRows(list,curSel);
+  const tot={val:sum(rows.map(r=>r.val)),cost:sum(rows.map(r=>r.cost)),pl:sum(rows.map(r=>r.pl))};
+  const asof=list.length?list.map(A=>A.asof).sort().pop():'';
+  const groups={};rows.forEach(r=>(groups[r.cls]||(groups[r.cls]=[])).push(r));
+  const now=Date.now();
+  let body='';
+  Object.keys(groups).sort().forEach(k=>{
+    const g=groups[k].sort((a,b)=>b.val-a.val);
+    const gv=sum(g.map(r=>r.val)),gc=sum(g.map(r=>r.cost)),gp=gv-gc;
+    body+=`<tr class="grp"><td colspan="13">${esc(k)} (${g.length}), wartość: <span class="v">${fmt(gv)}</span>, zysk: <span class="v ${cl(gp)}">${fmt(gp)}</span>, wartość zakupu: <span class="v">${fmt(gc)}</span>, zwrot: <span class="${cl(gp)}">${fmt(gc>0?gp/gc*100:null)}%</span>, udział: ${fmt(tot.val?gv/tot.val*100:0)}%</td></tr>`;
+    g.forEach(r=>{body+=`<tr><td>${esc(r.name)} (${esc(r.s)})</td><td class="${cl(r.dayPct)}">${r.dayPct==null?'–':fmt(r.dayPct)}</td><td>${fmt(r.q,r.q%1?4:0)}</td><td class="v">${fmt(r.avg)}</td><td class="v">${fmt(r.unit)}${r.noPx?' *':''}</td><td>${r.pd||'–'}</td><td>${r.first?Math.max(0,Math.round((now-ms(r.first))/864e5)):'–'}</td><td class="v">${fmt(r.val)}</td><td>${fmt(tot.val?r.val/tot.val*100:0)}</td><td class="${cl(r.ret)}">${fmt(r.ret)}</td><td class="v ${cl(r.pl)}">${fmt(r.pl)}</td><td class="v ${cl(r.real)}">${fmt(r.real)}</td><td class="v ${cl(r.div)}">${fmt(r.div)}</td></tr>`});
+  });
+  const opts=['PLN','USD','EUR','GBP','CHF'].map(c=>`<option ${c===curSel?'selected':''}>${c}</option>`).join('');
+  const T=agg(list,curSel);
+  const byCls=Object.entries(groups).map(([k,g])=>({label:k,value:sum(g.map(r=>r.val))}));
+  const byAcc=list.map(A=>({label:A.a.name,value:A.val*curRate(A.a.cur)/curRate(curSel)}));
+  const byCur={};list.forEach(A=>byCur[A.a.cur]=(byCur[A.a.cur]||0)+A.val*curRate(A.a.cur)/curRate(curSel));
+  return`<div class="card"><div class="row"><div><label>Waluta</label><select onchange="S.opt.cur=this.value;save();render()">${opts}</select></div><div class="note">Ceny z raportu z dnia ${asof}. * – brak ceny, liczono po koszcie.</div></div>
+  <div class="tw"><table><thead><tr><th class="l" style="min-width:230px">Walor</th><th>Zmiana dzienna [%]</th><th>Liczba jednostek</th><th>Śr. cena zakupu [${curSel}]</th><th>Cena aktualna [${curSel}]</th><th>Data ceny</th><th>Okres inwestycji [dni]</th><th>Wartość waloru [${curSel}]</th><th>Udział w wartości [%]</th><th>Stopa zwrotu [%]</th><th>Zysk [${curSel}]</th><th>Zrealizowany [${curSel}]</th><th>Dywidendy [${curSel}]</th></tr></thead>
+  <tbody><tr class="tot"><td>Cały portfel (pozycje)</td><td class="${cl(T.dayPct)}">${T.dayPct==null?'–':fmt(T.dayPct)}</td><td></td><td></td><td></td><td></td><td></td><td class="v">${fmt(tot.val)}</td><td>100</td><td class="${cl(tot.pl)}">${fmt(tot.cost>0?tot.pl/tot.cost*100:null)}</td><td class="v ${cl(tot.pl)}">${fmt(tot.pl)}</td><td class="v">${fmt(sum(rows.map(r=>r.real)))}</td><td class="v">${fmt(sum(rows.map(r=>r.div)))}</td></tr>${body}</tbody></table></div>
+  <div class="btns"><button class="btn" onclick="exportPos()">Eksport do csv</button></div></div>
+  <div class="card"><h2>Portfel – struktura inwestycji</h2><div class="g3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+   <div><div class="note" style="text-align:center">Udział klas aktywów</div>${donut(byCls)}</div>
+   <div><div class="note" style="text-align:center">Udział kont</div>${donut(byAcc)}</div>
+   <div><div class="note" style="text-align:center">Udział walut kont</div>${donut(Object.entries(byCur).map(([label,value])=>({label,value})))}</div>
+   <div><div class="note" style="text-align:center">Udział pozycji</div>${donut(rows.map(r=>({label:r.s,value:r.val})))}</div></div></div>`;
+}
+function exportPos(){
+  const list=sel(),cur=S.opt.cur,rows=mergedRows(list,cur);
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const L=[['Walor','Ticker','Klasa','Ilość','Śr.cena zakupu','Cena aktualna','Wartość','Zysk','Stopa %','Waluta'].join(';')];
+  rows.sort((a,b)=>b.val-a.val).forEach(r=>L.push([q(r.name),r.s,r.cls,r.q,r.avg.toFixed(4),r.unit.toFixed(4),r.val.toFixed(2),r.pl.toFixed(2),(r.ret??'').toString().slice(0,8),cur].join(';').replace(/(\d)\.(\d)/g,'$1,$2')));
+  dl('pozycje.csv','﻿'+L.join('\r\n'),'text/csv');
+}
+
+function ledger(){
+  const ids=new Set(sel().map(A=>A.a.id)),R=[];
+  S.lots.forEach(l=>{
+    if(!ids.has(l.a))return;const n=(S.inst[l.s]||{}).name||l.s;
+    R.push({d:l.ot,a:l.a,t:'Kupno',g:'trade',s:l.s,q:l.q,p:l.op,x:-l.c,n});
+    if(l.cl)R.push({d:l.ct,a:l.a,t:'Sprzedaż',g:'trade',s:l.s,q:l.q,p:l.cp,x:l.pr,n:`wynik ${fmt(l.re)}`});
+  });
+  S.cash.forEach(e=>{
+    if(!ids.has(e.a)||e.t==='Stock purchase'||e.t==='Stock sell'||e.t==='Total'||e.t==='Subaccount transfer')return;
+    const g=DIVT.has(e.t)?'div':FLOW.has(e.t)?'flow':'oth';
+    R.push({d:e.d,a:e.a,t:LEG[e.t]||e.t,g,s:e.s,x:e.x,n:e.m});
+  });
+  return R.sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:0);
+}
+function vLed(){
+  if(!S.accounts.length)return noData();
+  let R=ledger();
+  if(V.lt!=='all')R=R.filter(r=>r.g===V.lt);
+  if(V.lq){const q=V.lq.toLowerCase();R=R.filter(r=>(r.s||'').toLowerCase().includes(q)||(r.n||'').toLowerCase().includes(q)||(r.t||'').toLowerCase().includes(q))}
+  const rows=R.slice(0,500).map(r=>`<tr><td class="l">${r.d.slice(0,10)}</td><td class="l">${esc((acc(r.a)||{}).name)}</td><td class="l">${esc(r.t)}</td><td class="l"><b>${esc(r.s||'')}</b></td><td>${r.q!=null?fmt(r.q,r.q%1?4:0):''}</td><td>${r.p!=null?fmt(r.p):''}</td><td class="v ${cl(r.x)}">${fmt(r.x)}</td><td class="l mut" style="max-width:260px;overflow:hidden;text-overflow:ellipsis">${esc(r.n||'')}</td></tr>`).join('');
+  return`<div class="card"><h2>Transakcje i operacje <small>${R.length} pozycji${R.length>500?', pokazano 500 najnowszych':''}</small></h2>
+  <div class="row"><div><label>Rodzaj</label><select onchange="V.lt=this.value;render()">${[['all','Wszystkie'],['trade','Kupno / sprzedaż'],['div','Dywidendy i podatki'],['flow','Wpłaty, wypłaty, przelewy'],['oth','Odsetki, opłaty, inne']].map(([k,n])=>`<option value="${k}" ${V.lt===k?'selected':''}>${n}</option>`).join('')}</select></div>
+  <div><label>Szukaj</label><input value="${esc(V.lq)}" placeholder="ticker lub tekst" onchange="V.lq=this.value;render()"></div>
+  <button class="btn sec" onclick="exportLed()">Eksport do csv</button></div>
+  <div class="tw"><table><thead><tr><th class="l">Data (UTC)</th><th class="l">Konto</th><th class="l">Operacja</th><th class="l">Ticker</th><th>Ilość</th><th>Cena</th><th>Kwota (waluta konta)</th><th class="l">Opis</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="mut">Brak danych</td></tr>'}</tbody></table></div></div>`;
+}
+function exportLed(){
+  const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+  const L=['data;konto;operacja;ticker;ilosc;cena;kwota;opis'];
+  ledger().forEach(r=>L.push([r.d,q((acc(r.a)||{}).name),q(r.t),r.s||'',r.q??'',r.p??'',r.x,q(r.n)].join(';').replace(/(\d)\.(\d)/g,'$1,$2')));
+  dl('transakcje.csv','﻿'+L.join('\r\n'),'text/csv');
+}
+
+function vImp(){
+  let body='';
+  if(IM.busy)body='<div class="note">Wczytywanie plików…</div>';
+  else if(IM.items.length){
+    body=`<div class="tw"><table><thead><tr><th class="l">Plik</th><th class="l">Konto</th><th>Nr konta</th><th>Waluta</th><th>Zakres raportu</th><th>Pozycje otwarte</th><th>Zamknięte</th><th>Operacje</th><th>Gotówka</th><th class="l">Status</th><th></th></tr></thead><tbody>${IM.items.map((p,i)=>{
+      if(p.err)return`<tr><td class="l neg" colspan="10">${esc(p.err)}</td><td><button class="link" onclick="dropItem(${i})">usuń</button></td></tr>`;
+      const ex=S.accounts.find(a=>a.num===p.num);
+      return`<tr><td class="l">${esc(p.fname)}</td><td class="l"><b>${esc(ex?ex.name:p.name)}</b> <span class="tag">${p.kind}</span></td><td>${esc(p.num)}</td><td>${p.cur}</td><td>${p.from} → ${p.to}</td><td>${p.lots.filter(l=>!l.cl).length}</td><td>${p.lots.filter(l=>l.cl).length}</td><td>${p.cash.length}</td><td>${fmt(p.cashBal)}</td><td class="l ${ex?'':'pos'}">${ex?'aktualizacja (dane z XTB zostaną zastąpione)':'nowe konto'}${p.cfd?`<br><span class="mut">pominięto ${p.cfd} pozycji CFD</span>`:''}${p.warn.length?`<br><span class="neg">${esc([...new Set(p.warn)].slice(0,3).join('; '))}</span>`:''}</td><td><button class="link" onclick="dropItem(${i})">usuń z listy</button></td></tr>`}).join('')}</tbody></table></div>
+    ${(()=>{const nums=new Set(IM.items.filter(p=>!p.err).map(p=>p.num));const keep=S.accounts.filter(a=>!nums.has(a.num));return keep.length?`<div class="note">Konta, których nie ma na liście, zostają bez zmian: ${keep.map(a=>esc(a.name)).join(', ')}.</div>`:''})()}
+    <div class="row" style="margin-top:12px"><button class="btn" ${IM.items.some(p=>!p.err)?'':'disabled'} onclick="importAll()">Importuj ${IM.items.filter(p=>!p.err).length} kont</button><button class="btn sec" onclick="IM.items=[];render()">Anuluj</button></div>`;
+  }
+  return`<div class="card"><h2>Import raportów XTB (xlsx)</h2>
+   <div class="info">W xStation/XTB pobierz raport kont za cały okres (Historia konta → Eksport). Każdy plik .xlsx to jedno konto; aplikacja czyta z niego zakładki <b>Cash Operations</b>, <b>Closed Positions</b> i <b>Open Positions</b> (stąd aktualne ceny). Pliki można dodawać po kilka lub pojedynczo – lista się uzupełnia (ten sam rachunek dodany drugi raz zastępuje wcześniejszy plik na liście). Można też wskazać cały folder. Import nigdy nie usuwa kont, których nie ma na liście; zastępuje tylko dane kont z listy (nie dubluje). Konto, którego już nie potrzebujesz, usuniesz w zakładce „Konta”.</div>
+   <div class="row"><div><label>Dodaj pliki .xlsx (jeden lub kilka, można wielokrotnie)</label><input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple onchange="loadFiles(this.files);this.value=''"></div>
+   ${IOS?'':`<div><label>…albo cały folder</label><input type="file" webkitdirectory multiple onchange="loadFiles(this.files);this.value=''"></div>`}</div>${body}</div>`;
+}
+
+function vAcc(){
+  if(!S.accounts.length)return noData();
+  const m=M();
+  const rows=S.accounts.map(a=>{const A=m.find(x=>x.a.id===a.id);return`<tr><td class="l"><input value="${esc(a.name)}" onchange="upAcc('${a.id}','name',this.value)"></td><td class="l"><select onchange="upAcc('${a.id}','kind',this.value)">${KINDS.map(k=>`<option ${k===a.kind?'selected':''}>${k}</option>`).join('')}</select></td><td>${a.cur}</td><td>${esc(a.num||'ręczne')}</td><td>${a.from||''} → ${a.to||''}</td><td>${a.imported||''}</td><td class="v">${fmt(A.val)} ${a.cur}</td><td><label class="ck"><input type="checkbox" ${a.ex?'':'checked'} onchange="togEx('${a.id}')"> wliczaj</label></td><td><button class="link" onclick="delAcc('${a.id}')">usuń</button></td></tr>`}).join('');
+  return`<div class="card"><h2>Konta</h2><div class="tw"><table><thead><tr><th class="l">Nazwa</th><th class="l">Rodzaj</th><th>Waluta</th><th>Nr konta</th><th>Zakres raportu</th><th>Ostatni import</th><th>Wartość</th><th title="Czy konto jest wliczane do podsumowania i TWR całego portfela">W podsumowaniu</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function upAcc(id,k,v){acc(id)[k]=v.trim()||acc(id)[k];save();render()}
+function delAcc(id){if(!confirm(`Usunąć konto „${acc(id).name}” wraz ze wszystkimi danymi?`))return;S.accounts=S.accounts.filter(a=>a.id!==id);S.lots=S.lots.filter(l=>l.a!==id);S.cash=S.cash.filter(e=>e.a!==id);Object.keys(S.px).filter(k=>k.startsWith(id+'|')).forEach(k=>delete S.px[k]);save();render()}
+
+function vPx(){
+  if(!S.accounts.length)return noData();
+  const rows=[];
+  M().forEach(A=>A.list.forEach(r=>rows.push({A,r})));
+  rows.sort((x,y)=>x.A.a.name.localeCompare(y.A.a.name)||y.r.val-x.r.val);
+  return`<div class="card"><h2>Ceny i instrumenty</h2><div class="info">Ceny w walucie konta pochodzą z kolumny „Open Positions” najnowszego raportu. Możesz je poprawić ręcznie (zmiana dotyczy tylko tej pozycji do następnego importu).</div>
+  <div class="tw"><table><thead><tr><th class="l">Konto</th><th class="l">Ticker</th><th class="l">Nazwa</th><th class="l">Klasa</th><th>Ilość</th><th>Cena [waluta konta]</th><th>Data ceny</th><th class="l">Symbol Yahoo</th></tr></thead><tbody>${rows.map(({A,r})=>`<tr><td class="l">${esc(A.a.name)}</td><td class="l"><b>${esc(r.s)}</b></td><td class="l"><input value="${esc(r.name)}" onchange="upInst('${esc(r.s)}','name',this.value)"></td><td class="l"><select onchange="upInst('${esc(r.s)}','cls',this.value)">${['Akcje','ETF','CFD','Obligacje','Surowce','Krypto','Inne'].map(c=>`<option ${c===r.cls?'selected':''}>${c}</option>`).join('')}</select></td><td>${fmt(r.q,r.q%1?4:0)}</td><td><input type="number" step="any" style="width:110px" value="${r.noPx?'':r.unit}" onchange="upPx('${A.a.id}','${esc(r.s)}',this.value)"></td><td>${r.pd||'–'}</td><td class="l"><input style="width:110px" value="${esc(ysym(r.s))}" onchange="upY('${esc(r.s)}',this.value)"></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function upY(s,v){v=v.trim();if(v&&v!==ysym(s))S.ysym[s]=v;else delete S.ysym[s];save();render()}
+function upInst(s,k,v){const i=S.inst[s]||(S.inst[s]={});i[k]=v;if(k==='name')i.userName=v;else i.userCls=v;save();if(k==='cls')render()}
+function upPx(a,s,v){const n=parseFloat(String(v).replace(',','.')),k=a+'|'+s;if(!isFinite(n)){delete S.px[k]}else{const o=S.px[k]||{};S.px[k]=Object.assign({},o,{p:n,d:new Date().toISOString().slice(0,10)})}save();render()}
+
+function vSet(){
+  const curs=[...new Set(['USD','EUR','GBP','CHF',...S.accounts.map(a=>a.cur).filter(c=>c!=='PLN')])];
+  let apiStored='';try{apiStored=localStorage.getItem('mojportfel.api')||''}catch(e){}
+  return`<div class="card"><h2>Serwer cen</h2>
+   <p class="note">Ceny na żywo i historia notowań idą przez serwer pośredniczący. Na komputerze może to być <b>start.bat</b>, a na telefonie – Twój darmowy pośrednik w Cloudflare (instrukcja w pliku TELEFON.txt). To ustawienie dotyczy tylko tego urządzenia.</p>
+   <div class="row"><div style="flex:1 1 320px"><label>Adres pośrednika (puste = domyślny)</label><input id="apiu" style="width:100%" placeholder="https://moj-portfel-ceny.twoja-nazwa.workers.dev" value="${esc(apiStored)}"></div><button class="btn" onclick="setApi()">Zapisz i sprawdź</button></div>
+   <div class="note">Używany adres: <b>${esc(BASE||location.origin)}</b> – ${SV.ok?'<span class="pos">działa</span>':'<span class="neg">nie odpowiada</span>'}</div></div>
+  <div class="card"><h2>Kursy walut <small>zł za 1 jednostkę${S.fxDate?', NBP z '+S.fxDate:''}</small></h2>
+   <div class="row">${curs.map(c=>`<div><label>${c}</label><input type="number" step="any" style="width:110px" value="${S.fx[c]??''}" onchange="setFx('${c}',this.value)"></div>`).join('')}</div>
+   <div class="row"><button class="btn" onclick="fetchNBP()">Pobierz bieżące kursy z NBP</button><button class="btn sec" onclick="fetchHist()">Pobierz historyczne kursy NBP (dokładny wkład w zł)</button></div>
+   <div class="note">Kursy historyczne: ${Object.keys(S.fxh).map(c=>c+' ('+S.fxh[c].d.length+' dni)').join(', ')||'brak'}.</div></div>
+  <div class="card"><h2>Profil: ${esc(ME().name)}</h2>
+   <p class="note">Dane tego profilu są oddzielone od pozostałych profili w tej aplikacji.</p>
+   <div class="row"><button class="btn sec" onclick="openRename()">Zmień nazwę</button><button class="btn sec" onclick="openPw()">${ME().hash?'Zmień / usuń hasło':'Ustaw hasło'}</button><button class="btn sec" onclick="logout()">Wyloguj</button><button class="btn sec" onclick="openDel()">Usuń profil</button></div></div>
+  <div class="card"><h2>Kopia zapasowa</h2>
+   <p class="note">Dane są zapisane w przeglądarce na tym komputerze. Wyczyszczenie danych przeglądarki je usunie – raporty z XTB zawsze możesz zaimportować ponownie, ale zrób też kopię.</p>
+   <div class="row"><button class="btn" onclick="exportJSON()">Eksportuj do pliku JSON</button><div><label>Wczytaj kopię</label><input type="file" accept=".json" onchange="importJSON(this)"></div><button class="btn sec" onclick="wipe()">Usuń wszystkie dane</button></div></div>`;
+}
+async function setApi(){
+  const v=(document.getElementById('apiu').value||'').trim();
+  if(v&&!/^https?:\/\/[^\s]+$/i.test(v))return toast('Adres musi zaczynać się od https://');
+  try{v?localStorage.setItem('mojportfel.api',v):localStorage.removeItem('mojportfel.api')}catch(e){}
+  BASE=apiBase();await ping();render();
+  toast(SV.ok?'Serwer cen działa':'Serwer cen nie odpowiada pod tym adresem');
+  if(SV.ok&&S.accounts.length){fetchNBP(true);refreshLive(true)}
+}
+function setFx(c,v){const n=parseFloat(String(v).replace(',','.'));if(isFinite(n)&&n>0){S.fx[c]=n;save();render()}}
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function exportJSON(){dl('portfel-kopia-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(S),'application/json')}
+function importJSON(inp){
+  const f=inp.files[0];if(!f)return;const fr=new FileReader();
+  fr.onload=()=>{try{const d=JSON.parse(fr.result);if(!d.accounts||!d.lots)throw 0;if(!confirm('Zastąpić obecne dane kopią z pliku?'))return;S=Object.assign(blank(),d);save();render();toast('Wczytano kopię')}catch(e){toast('To nie jest poprawny plik kopii')}};
+  fr.readAsText(f);
+}
+/* ---- profile: logowanie ---- */
+async function hpw(pw,salt){
+  try{const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);
+    const b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:100000,hash:'SHA-256'},k,256);
+    return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch(e){let h=5381;const t=salt+pw;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'f'+(h>>>0).toString(16)}
+}
+let LG={mode:'list',sel:null,msg:''};
+function showLogin(){
+  const el=document.getElementById('login');el.style.display='block';
+  const m=LG.msg?`<div class="neg" style="margin:8px 0">${esc(LG.msg)}</div>`:'';
+  const back="LG={mode:'list',sel:null,msg:''};render()";
+  let h='';
+  if(LG.mode==='new'||!P.list.length){
+    h=`<h2>${P.list.length?'Nowy profil':'Utwórz pierwszy profil'}</h2>
+    <p class="note">Każdy profil ma własne konta, transakcje i statystyki. Hasło jest opcjonalne.</p>
+    <label>Nazwa</label><input id="lgn" style="width:100%" maxlength="30">
+    <label>Hasło (opcjonalnie)</label><input id="lgp" type="password" style="width:100%">
+    <label>Powtórz hasło</label><input id="lgp2" type="password" style="width:100%" onkeydown="if(event.key==='Enter')createProfile()">
+    ${m}<div class="row" style="margin-top:12px"><button class="btn" onclick="createProfile()">Utwórz i zaloguj</button>${P.list.length?`<button class="btn sec" onclick="${back}">Wróć</button>`:''}</div>`;
+  }else if(LG.sel){
+    const u=P.list.find(x=>x.id===LG.sel);
+    h=`<h2>Profil: ${esc(u.name)}</h2><label>Hasło</label><input id="lgp" type="password" style="width:100%" onkeydown="if(event.key==='Enter')tryLogin('${u.id}')">
+    ${m}<div class="row" style="margin-top:12px"><button class="btn" onclick="tryLogin('${u.id}')">Zaloguj</button><button class="btn sec" onclick="${back}">Wróć</button></div>`;
+  }else{
+    h=`<h2>Wybierz profil</h2>${P.list.map(u=>`<button class="pfb" onclick="pick('${u.id}')"><i>${esc(u.name.slice(0,1).toUpperCase())}</i>${esc(u.name)}<small>${u.hash?'🔒 hasło':'bez hasła'}</small></button>`).join('')}
+    <div class="row" style="margin-top:12px"><button class="btn sec" onclick="LG={mode:'new',sel:null,msg:''};render()">+ Nowy profil</button></div>`;
+  }
+  el.innerHTML=`<div class="box"><div class="logo" style="font-size:22px;margin-bottom:14px">📈 Mój Portfel</div><div class="card">${h}</div>
+  <p class="note">Profile i hasła są zapisane lokalnie w tej przeglądarce – to rozdzielenie danych osób korzystających z jednego komputera, a nie szyfrowanie.</p></div>`;
+  const f=el.querySelector('input');if(f)setTimeout(()=>f.focus(),30);
+}
+function pick(id){const u=P.list.find(x=>x.id===id);if(!u.hash)return enterProfile(id);LG={mode:'list',sel:id,msg:''};render()}
+function enterProfile(id){ss('mojportfel.cur',id);ss('mojportfel.out',null);location.reload()}
+async function tryLogin(id){
+  const u=P.list.find(x=>x.id===id),pw=document.getElementById('lgp').value;
+  if(await hpw(pw,u.salt)===u.hash)enterProfile(id);else{LG.msg='Nieprawidłowe hasło';render()}
+}
+async function createProfile(){
+  const name=document.getElementById('lgn').value.trim(),pw=document.getElementById('lgp').value,pw2=document.getElementById('lgp2').value;
+  if(!name){LG.msg='Podaj nazwę profilu';return render()}
+  if(P.list.some(x=>x.name.toLowerCase()===name.toLowerCase())){LG.msg='Profil o takiej nazwie już istnieje';return render()}
+  if(pw!==pw2){LG.msg='Hasła się różnią';return render()}
+  const id=uid(),salt=uid()+uid();
+  P.list.push({id,name,salt:pw?salt:'',hash:pw?await hpw(pw,salt):''});saveP();enterProfile(id);
+}
+function logout(){ss('mojportfel.cur',null);ss('mojportfel.out','1');location.reload()}
+/* ---- menu profilu i okna ---- */
+document.addEventListener('click',()=>{const m=document.getElementById('um');if(m)m.style.display='none'});
+function toggleMenu(){const m=document.getElementById('um');m.style.display=m.style.display==='none'?'block':'none'}
+function modal(h){const m=document.getElementById('modal');m.innerHTML='<div class="card">'+h+'</div>';m.style.display='flex';const f=m.querySelector('input');if(f)setTimeout(()=>f.focus(),30)}
+function closeModal(){document.getElementById('modal').style.display='none'}
+const mErr=t=>{const e=document.getElementById('merr');if(e)e.textContent=t};
+function openRename(){modal(`<h2>Zmień nazwę profilu</h2><input id="mn" style="width:100%" maxlength="30" value="${esc(ME().name)}" onkeydown="if(event.key==='Enter')doRename()"><div id="merr" class="neg" style="margin:8px 0"></div><div class="row"><button class="btn" onclick="doRename()">Zapisz</button><button class="btn sec" onclick="closeModal()">Anuluj</button></div>`)}
+function doRename(){
+  const n=document.getElementById('mn').value.trim();if(!n)return mErr('Podaj nazwę');
+  if(P.list.some(x=>x.id!==CUR&&x.name.toLowerCase()===n.toLowerCase()))return mErr('Profil o takiej nazwie już istnieje');
+  ME().name=n;saveP();closeModal();render();toast('Nazwa zmieniona');
+}
+function openPw(){const has=!!ME().hash;modal(`<h2>${has?'Zmień lub usuń hasło':'Ustaw hasło'}</h2>
+  ${has?'<label>Obecne hasło</label><input id="pw0" type="password" style="width:100%">':'<p class="note">Po ustawieniu hasła przy wyborze tego profilu trzeba będzie je podać.</p>'}
+  <label>Nowe hasło${has?' (puste = usuń hasło)':''}</label><input id="pw1" type="password" style="width:100%">
+  <label>Powtórz nowe hasło</label><input id="pw2" type="password" style="width:100%" onkeydown="if(event.key==='Enter')doPw()">
+  <div id="merr" class="neg" style="margin:8px 0"></div><div class="row"><button class="btn" onclick="doPw()">Zapisz</button><button class="btn sec" onclick="closeModal()">Anuluj</button></div>`)}
+async function doPw(){
+  const u=ME(),g=id=>document.getElementById(id)?document.getElementById(id).value:'';
+  if(u.hash&&await hpw(g('pw0'),u.salt)!==u.hash)return mErr('Nieprawidłowe obecne hasło');
+  const n=g('pw1');if(n!==g('pw2'))return mErr('Hasła się różnią');
+  if(!n&&!u.hash)return mErr('Wpisz hasło');
+  if(n){const salt=uid()+uid();u.salt=salt;u.hash=await hpw(n,salt)}else{u.salt='';u.hash=''}
+  saveP();closeModal();render();toast(n?'Hasło zapisane':'Hasło usunięte');
+}
+function openDel(){const u=ME();modal(`<h2>Usunąć profil „${esc(u.name)}”?</h2><p class="note">Zostaną usunięte wszystkie konta, transakcje i ustawienia tego profilu. Tego nie można cofnąć – wcześniej możesz zrobić kopię w Ustawieniach.</p>
+  ${u.hash?'<label>Hasło profilu</label><input id="pwd" type="password" style="width:100%" onkeydown="if(event.key===\'Enter\')doDel()">':''}
+  <div id="merr" class="neg" style="margin:8px 0"></div><div class="row"><button class="btn" style="background:#b00020" onclick="doDel()">Usuń profil na stałe</button><button class="btn sec" onclick="closeModal()">Anuluj</button></div>`)}
+async function doDel(){
+  const u=ME();
+  if(u.hash){const e=document.getElementById('pwd');if(await hpw(e?e.value:'',u.salt)!==u.hash)return mErr('Nieprawidłowe hasło')}
+  try{localStorage.removeItem(LS)}catch(e){}
+  P.list=P.list.filter(x=>x.id!==CUR);saveP();logout();
+}
+function wipe(){if(confirm('Na pewno usunąć wszystkie konta i dane?')&&confirm('To nieodwracalne. Kontynuować?')){S=blank();save();render()}}
+
+if('serviceWorker' in navigator&&(location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+render();
+if(CUR){
+  ping().then(()=>{
+    render();
+    if(S.accounts.length){
+      if(S.fxDate!==new Date().toISOString().slice(0,10))fetchNBP(true);
+      if(SV.ok)refreshLive(true).then(()=>{if(S.twr&&S.twr.ver!==5)computeHistory()});
+    }
+  });
+  setInterval(()=>{if(SV.ok&&S.opt.auto&&!SV.busy&&S.accounts.length)refreshLive(true)},300000);
+}
+</script>
+</body>
+</html>
