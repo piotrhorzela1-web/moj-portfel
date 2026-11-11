@@ -85,6 +85,9 @@ tr.tot td{background:#f3f4f8;font-weight:700;font-style:italic}
 .tag{background:var(--soft);border-radius:5px;padding:1px 7px;font-size:11px}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0b1220;color:#fff;padding:9px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;max-width:90vw;z-index:30}
 #toast.on{opacity:1}
+html,body{overscroll-behavior-y:contain}
+#ptr{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translate(-50%,-70px);background:#0b1220;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:40;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#ptr.rel{transition:transform .2s}
 svg text{fill:#555;font-size:10px}
 @media(max-width:700px){.g3{grid-template-columns:1fr}.tl b{font-size:19px}}
 @media(max-width:700px){
@@ -141,6 +144,7 @@ svg text{fill:#555;font-size:10px}
 <div id="login"></div>
 <div id="modal"></div>
 <div id="toast"></div>
+<div id="ptr"></div>
 
 <script>
 'use strict';
@@ -1129,6 +1133,25 @@ async function doDel(){
 }
 function wipe(){if(confirm('Na pewno usunąć wszystkie konta i dane?')&&confirm('To nieodwracalne. Kontynuować?')){S=blank();save();render()}}
 
+/* Pociągnij w dół, aby odświeżyć (telefon): przeładowuje aplikację (nowa wersja) i pobiera ceny */
+(function(){
+  const el=document.getElementById('ptr'),TH=85;let y0=null,dy=0,busy=false;
+  const top=()=>(window.scrollY||document.documentElement.scrollTop||0)<=0;
+  const open=id=>{const e=document.getElementById(id);return e&&e.style.display&&e.style.display!=='none'};
+  const set=v=>{el.style.transform=`translate(-50%,${v}px)`};
+  addEventListener('touchstart',e=>{y0=null;dy=0;if(busy||e.touches.length!==1||!top()||open('modal'))return;y0=e.touches[0].clientY;el.classList.remove('rel')},{passive:true});
+  addEventListener('touchmove',e=>{
+    if(y0==null)return;dy=e.touches[0].clientY-y0;
+    if(dy<=0||!top()){set(-70);if(!top())y0=null;return}
+    el.textContent=dy>TH?'↻ Puść, aby odświeżyć':'↓ Pociągnij, aby odświeżyć';set(Math.min(dy/2,60)-50);
+  },{passive:true});
+  const end=()=>{
+    if(y0==null)return;const go=dy>TH;y0=null;el.classList.add('rel');
+    if(!go){set(-70);return}
+    busy=true;el.textContent='⟳ Odświeżam…';set(10);setTimeout(()=>location.reload(),150);
+  };
+  addEventListener('touchend',end,{passive:true});addEventListener('touchcancel',()=>{y0=null;el.classList.add('rel');set(-70)},{passive:true});
+})();
 if('serviceWorker' in navigator&&(location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 render();
