@@ -85,6 +85,11 @@ tr.tot td{background:#f3f4f8;font-weight:700;font-style:italic}
 .tag{background:var(--soft);border-radius:5px;padding:1px 7px;font-size:11px}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0b1220;color:#fff;padding:9px 16px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;max-width:90vw;z-index:30}
 #toast.on{opacity:1}
+.re-in{width:100%}.rec .tw{margin:4px 0 10px}.rec table input,.rec table select{max-width:100%}
+.rec>h2 input{font:inherit;font-style:italic;font-weight:700;border:0;border-bottom:1px dashed var(--line);background:transparent;width:min(100%,420px)}
+.rec h3{margin:14px 0 4px;font-size:14px;font-style:italic}
+.rec{scroll-margin-top:130px}.rer{cursor:pointer}.rer:hover td{background:#f3f4f8}.rer .ren{color:var(--navy);text-decoration:underline;font-weight:600}
+.rec .est{font-size:12px;color:var(--mut);margin:2px 0 8px}
 html,body{overscroll-behavior-y:contain}
 #ptr{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:50%;transform:translate(-50%,-70px);background:#0b1220;color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;z-index:40;pointer-events:none;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 #ptr.rel{transition:transform .2s}
@@ -167,7 +172,7 @@ const FLOW=new Set(['Deposit','Withdrawal','IKE deposit','IKZE deposit','Transfe
 const CFDT=new Set(['Close trade','Swap']);
 const DIVT=new Set(['Dividend','Dividend from foreign company on PL market','Dividend equivalent','Withholding tax','Adjustment fee']);
 const LEG={'Deposit':'Wpłata','Withdrawal':'Wypłata','IKE deposit':'Przelew IKE','IKZE deposit':'Przelew IKZE','Transfer':'Konwersja walut','Free funds interest':'Odsetki od wolnych środków','Free funds interest tax':'Podatek od odsetek','Dividend':'Dywidenda','Dividend from foreign company on PL market':'Dywidenda (zagraniczna)','Dividend equivalent':'Ekwiwalent dywidendy','Withholding tax':'Podatek u źródła','Adjustment fee':'Korekta dywidendy','SEC fee':'Opłata SEC','Correction':'Korekta','Swap':'Swap','Close trade':'Wynik CFD','Subaccount transfer':'Przelew między subkontami'};
-const blank=()=>({accounts:[],lots:[],cash:[],inst:{},px:{},fx:{USD:3.8938,EUR:4.3677,GBP:5.1839,CHF:4.7154},fxh:{},snaps:[],opt:{cur:'PLN',hide:false,round:false,percur:true,auto:true,cfdIn:false},ysym:{},twr:null,live:null});
+const blank=()=>({accounts:[],lots:[],cash:[],inst:{},px:{},fx:{USD:3.8938,EUR:4.3677,GBP:5.1839,CHF:4.7154},fxh:{},snaps:[],opt:{cur:'PLN',hide:false,round:false,percur:true,auto:true,cfdIn:false,reIn:false},re:[],ysym:{},twr:null,live:null});
 let S=load(),MC=null;
 const SV={ok:false,busy:'',prog:''};
 let V={tab:'dash',acc:'all',lq:'',lt:'all'};
@@ -798,8 +803,210 @@ function timeline(list){
   return{cost,wk:wkl};
 }
 
+
+/* ================= Nieruchomości ================= */
+const RE_TYPES=['Mieszkanie','Dom','Lokal użytkowy','Garaż / komórka','Działka','Inne'];
+const RE_M={gr:'wzrost cen w mieście (dane NBP)',man:'wartość wpisana ręcznie'};
+
+/* Ceny transakcyjne NBP (zł/m²): IV kw. każdego roku, dla 2026 – II kw. (Katowice: I kw.). p = rynek pierwotny, w = wtórny.
+   Warszawa: pełny szereg od 2006. Pozostałe miasta: wartości z danych NBP tam, gdzie je mamy; brakujące lata są szacowane
+   z szeregu Warszawy i stosunku cen miasta do Warszawy (zaznaczone w tabeli kursywą). */
+const RE_IDX={
+ 'Warszawa':{p:{2006:6186,2007:8571,2008:8149,2009:7680,2010:7441,2011:7226,2012:6466,2013:7427,2014:7315,2015:7462,2016:7686,2017:7751,2018:8565,2019:9476,2020:10240,2021:11620,2022:12836,2023:14927,2024:16548,2025:16577,2026:16783},
+             w:{2006:6267,2007:8242,2008:8025,2009:7649,2010:7765,2011:7752,2012:7355,2013:7079,2014:7326,2015:7314,2016:7576,2017:8019,2018:8680,2019:9732,2020:10662,2021:11618,2022:13026,2023:14149,2024:16972,2025:16759,2026:16723}},
+ 'Kraków':{p:{2021:10293,2022:12131,2024:15456,2025:15588,2026:15923},w:{2021:9785,2022:11086,2024:15235,2025:14898,2026:14792}},
+ 'Wrocław':{p:{2022:10453,2024:14142,2025:14062,2026:14312},w:{2022:10114,2024:12950,2025:12546,2026:12590}},
+ 'Gdańsk':{p:{2022:10694,2024:13149,2025:14397,2026:14491},w:{2022:11278,2024:13152,2025:13392,2026:14035}},
+ 'Poznań':{p:{2022:9716,2024:12774,2025:12435,2026:12766},w:{2022:8709,2024:10927,2025:10636,2026:10891}},
+ 'Łódź':{p:{2022:8520,2024:9996,2025:9708,2026:9945},w:{2022:6384,2024:7592,2025:8038,2026:8020}},
+ 'Katowice':{p:{2024:11931,2025:11854,2026:12031},w:{2024:7991,2025:8188,2026:8054}}
+};
+const RE_R06={'Kraków':.884,'Wrocław':.784,'Gdańsk':.633,'Poznań':.611,'Łódź':.391}; // stosunek cen wtórnych do Warszawy w 2006 (NBP)
+const reTs=y=>y>=2026?Date.UTC(2026,4,15):Date.UTC(y,10,15);
+const reSerC={};
+function reSer(city,m){
+  const key=city+'|'+m;if(reSerC[key])return reSerC[key];
+  const W=RE_IDX['Warszawa'][m],out=[];
+  if(city==='Warszawa'){for(let y=2006;y<=2026;y++)out.push({y,v:W[y],est:false})}
+  else{
+    const kn=RE_IDX[city][m],an=[];
+    if(RE_R06[city])an.push([2006,RE_R06[city]]);
+    Object.keys(kn).map(Number).sort((a,b)=>a-b).forEach(y=>an.push([y,kn[y]/W[y]]));
+    for(let y=2006;y<=2026;y++){
+      if(kn[y]!=null){out.push({y,v:kn[y],est:false});continue}
+      let L=null,R=null;an.forEach(a=>{if(a[0]<=y)L=a;if(a[0]>=y&&!R)R=a});
+      const r=L&&R&&L[0]!==R[0]?L[1]+(R[1]-L[1])*(y-L[0])/(R[0]-L[0]):(L||R)[1];
+      out.push({y,v:W[y]*r,est:true});
+    }
+  }
+  return reSerC[key]=out;
+}
+function reAt(ser,t){
+  const pts=ser.map(o=>[reTs(o.y),o.v]),n=pts.length;
+  if(t<=pts[0][0])return pts[0][1];
+  if(t>=pts[n-1][0])return pts[n-1][1];
+  for(let i=1;i<n;i++)if(t<=pts[i][0]){const a=pts[i-1],b=pts[i];return a[1]+(b[1]-a[1])*(t-a[0])/(b[0]-a[0])}
+}
+function reGrowth(p){
+  const m='w',t=ms(p.buyDate),now=Date.now(),cities=Object.keys(RE_IDX);
+  const f=c=>{const s=reSer(c,m);return reAt(s,now)/reAt(s,t)};
+  const own=RE_IDX[p.city];
+  return{f:own?f(p.city):sum(cities.map(f))/cities.length,lab:own?p.city:'średnia z '+cities.length+' miast',early:t<reTs(2006),late:t>=reTs(2026)};
+}
+const reYm=s=>{const m=/^(\d{4})-(\d{2})/.exec(s||'');return m?(+m[1])*12+(+m[2]-1):null};
+const renum=v=>{const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+function reEst(p){
+  const o={};
+  if(p.buyPrice>0&&p.buyDate){const g=reGrowth(p);o.gr=p.buyPrice*g.f;o.g=g}
+  if(p.manual>0)o.man=+p.manual;
+  return o;
+}
+function reRent(p){
+  const now=new Date(),cm=now.getFullYear()*12+now.getMonth(),tx=(p.tax||0)/100;
+  let g=0,k=0,t=0,n12=0,g12=0,mo=0;const fl=[];
+  (p.rent||[]).forEach(r=>{
+    const a=reYm(r.from);if(a==null)return;
+    let b=r.to?reYm(r.to):cm;if(b==null)b=cm;b=Math.min(b,cm);
+    for(let m=a;m<=b;m++){
+      const am=r.amt||0,co=r.cost||0,tax=am*tx,net=am-co-tax;
+      g+=am;k+=co;t+=tax;mo++;fl.push({t:Math.min(Date.UTC(Math.floor(m/12),m%12,15),Date.now()),v:net});
+      if(cm-m<12){g12+=am;n12+=net}
+    }
+  });
+  return{gross:g,costs:k,tax:t,net:g-k-t,net12:n12,gross12:g12,months:mo,fl};
+}
+function reCalc(p){
+  const e=reEst(p),order=p.method==='man'?['man','gr']:['gr','man'];
+  let v=null,m=null;for(const k of order)if(e[k]!=null){v=e[k];m=k;break}
+  const buy=p.buyPrice||0,cs=sum((p.costs||[]).map(x=>x.x||0)),inv=buy+cs;
+  if(v==null){v=inv;m=null}
+  const rt=reRent(p),gain=v-inv,profit=gain+rt.net;
+  const fl=[];
+  if(p.buyDate&&buy>0)fl.push({t:ms(p.buyDate),v:-buy});
+  (p.costs||[]).forEach(c=>{if(c.d&&c.x)fl.push({t:ms(c.d),v:-c.x})});
+  rt.fl.forEach(f=>fl.push(f));
+  const xi=p.buyDate&&buy>0?xirr([...fl,{t:Date.now(),v}]):null;
+  return{e,v,m,buy,cs,inv,rt,gain,gainP:inv>0?gain/inv*100:null,profit,roi:inv>0?profit/inv*100:null,y12:v>0?rt.net12/v*100:null,y12c:inv>0?rt.net12/inv*100:null,xi,fl,dated:!!(p.buyDate&&buy>0)};
+}
+function reTot(){
+  const R={n:S.re.length,val:0,inv:0,gain:0,net:0,net12:0,profit:0,fl:[],ok:true};
+  S.re.forEach(p=>{const c=reCalc(p);R.val+=c.v;R.inv+=c.inv;R.gain+=c.gain;R.net+=c.rt.net;R.net12+=c.rt.net12;R.profit+=c.profit;c.fl.forEach(f=>R.fl.push(f));if(!c.dated)R.ok=false});
+  R.gainP=R.inv>0?R.gain/R.inv*100:null;R.roi=R.inv>0?R.profit/R.inv*100:null;R.y12=R.val>0?R.net12/R.val*100:null;R.y12c=R.inv>0?R.net12/R.inv*100:null;
+  return R;
+}
+function withRe(T,cur){
+  const R=reTot();if(!S.opt.reIn||!R.n)return T;
+  const cr=curRate(cur)||1,T2=Object.assign({},T);
+  T2.val=T.val+R.val/cr;T2.wk=T.wk+R.inv/cr;T2.unreal=T.unreal+R.gain/cr;
+  T2.profit=T.profit+(R.gain+R.net)/cr;
+  T2.rate=T2.wk>0?T2.profit/T2.wk*100:null;T2.tw=null;
+  T2.xirr=R.ok?xirr([...T.fl,...R.fl.map(f=>({t:f.t,v:f.v/cr})),{t:Date.now(),v:T2.val}]):null;
+  return T2;
+}
+function reGo(id){
+  if(V.tab!=='re')go('re');
+  setTimeout(()=>{const e=document.getElementById('re_'+id);if(e){e.scrollIntoView({behavior:'smooth',block:'start'});e.style.transition='box-shadow .3s';e.style.boxShadow='0 0 0 3px #2a7d00';setTimeout(()=>e.style.boxShadow='',1600)}},50);
+}
+function reAdd(){
+  S.re.push({id:uid(),name:'Nieruchomość '+(S.re.length+1),type:'Mieszkanie',city:'',buyDate:'',buyPrice:0,method:'gr',manual:0,manualDate:'',tax:0,costs:[],rent:[]});
+  save();render();
+}
+const reGet=id=>S.re.find(x=>x.id===id);
+function reSet(id,f,v){
+  const p=reGet(id);if(!p)return;
+  if(['buyPrice','manual','tax'].includes(f))p[f]=Math.max(0,renum(v));
+  else if(f==='growth')p.growth=String(v).trim()===''?null:renum(v);
+  else p[f]=String(v).trim();
+  if(f==='name'&&!p.name)p.name='Nieruchomość';
+  save();render();
+}
+function reDel(id){const p=reGet(id);if(!p||!confirm(`Usunąć „${p.name}” wraz z kosztami i najmem?`))return;S.re=S.re.filter(x=>x.id!==id);save();render()}
+function reCostAdd(id){
+  const p=reGet(id),g=k=>document.getElementById(k+'_'+id).value;
+  const x=renum(g('cx'));if(!p||!x)return toast('Wpisz kwotę kosztu');
+  p.costs.push({id:uid(),d:g('cd')||p.buyDate||new Date().toISOString().slice(0,10),desc:g('cn').trim()||'Remont / koszt',x});
+  p.costs.sort((a,b)=>String(a.d).localeCompare(String(b.d)));save();render();
+}
+function reCostDel(id,cid){const p=reGet(id);p.costs=p.costs.filter(c=>c.id!==cid);save();render()}
+function reRentAdd(id){
+  const p=reGet(id),g=k=>document.getElementById(k+'_'+id).value;
+  const from=g('rf'),amt=renum(g('ra'));
+  if(!reYm(from))return toast('Wpisz miesiąc początku najmu w formacie RRRR-MM');
+  if(g('rt')&&reYm(g('rt'))==null)return toast('Miesiąc końca najmu: RRRR-MM albo puste, jeśli najem trwa');
+  if(!amt)return toast('Wpisz miesięczny czynsz');
+  p.rent.push({id:uid(),from,to:g('rt'),amt,cost:renum(g('rk'))});
+  p.rent.sort((a,b)=>a.from.localeCompare(b.from));save();render();
+}
+function reRentDel(id,rid){const p=reGet(id);p.rent=p.rent.filter(r=>r.id!==rid);save();render()}
+function reRentUp(id,rid,f,v){
+  const r=reGet(id).rent.find(x=>x.id===rid);
+  if(f==='amt'||f==='cost')r[f]=Math.max(0,renum(v));else r[f]=String(v).trim();
+  save();render();
+}
+function reCard(p){
+  const c=reCalc(p),e=c.e,nv=x=>x?x:'';
+  const opts=(arr,cur,blank)=>(blank?`<option value="">${blank}</option>`:'')+arr.map(x=>`<option ${x===cur?'selected':''}>${esc(x)}</option>`).join('');
+  const fld=(l,html)=>`<div><label>${l}</label>${html}</div>`;
+  const inp=(f,t,w,ph)=>`<input type="${t||'text'}" ${t==='number'?'step="any" inputmode="decimal"':''} style="width:${w}px" ${ph?`placeholder="${ph}"`:''} value="${esc(t==='number'?nv(p[f]):(p[f]||''))}" onchange="reSet('${p.id}','${f}',this.value)">`;
+  const sel=(f,arr,blank)=>`<select onchange="reSet('${p.id}','${f}',this.value)">${opts(arr,p[f],blank)}</select>`;
+  const flat=p.type==='Mieszkanie';
+  const ests=[e.gr!=null?`wg wzrostu cen od zakupu: <b>${fmt(e.gr,0)} zł</b>`:null,e.man!=null?`wpisana ręcznie: <b>${fmt(e.man,0)} zł</b>`:null].filter(Boolean);
+  const mm=p.method==='man'?'man':'gr';
+  let h=`<div class="card rec" id="re_${p.id}"><h2><input value="${esc(p.name)}" onchange="reSet('${p.id}','name',this.value)" title="Nazwa nieruchomości"> <small>${esc(p.type)}${p.city?' · '+esc(p.city):''}</small> <button class="btn sec" style="float:right;font-size:12px;padding:5px 10px" onclick="reDel('${p.id}')">🗑 Usuń</button></h2>
+  <div class="row">${fld('Rodzaj',sel('type',RE_TYPES))}${fld('Miasto',sel('city',[...Object.keys(RE_IDX),'Inne'],'– wybierz –'))}</div>
+  <div class="row">${fld('Data zakupu',inp('buyDate','date',150))}${fld('Cena zakupu (zł)',inp('buyPrice','number',130))}</div>
+  <h3>Wartość obecna</h3>
+  <div class="row">${fld('Sposób wyceny',`<select style="max-width:100%" onchange="reSet('${p.id}','method',this.value)">${Object.keys(RE_M).map(k=>`<option value="${k}" ${k===mm?'selected':''}>${RE_M[k]}</option>`).join('')}</select>`)}
+   ${mm==='man'?fld('Wartość (zł)',inp('manual','number',130))+fld('Z dnia',inp('manualDate','date',150)):''}</div>
+  <div class="est">${ests.length?'Wyceny: '+ests.join(' · '):'Wpisz cenę i datę zakupu (wycena ze wzrostu cen w mieście) albo wybierz wycenę ręczną i wpisz wartość.'}${e.g?`<br>Wzrost cen mieszkań od zakupu do dziś: <b class="${e.g.f>=1?'pos':'neg'}">${pc((e.g.f-1)*100)}</b> (${esc(e.g.lab)}, ceny mieszkań z rynku wtórnego, dane NBP).${e.g.early?' Zakup sprzed 2006 r. – liczone od 2006 r.':''}${e.g.late?' Brak nowszych danych niż II kw. 2026.':''}${RE_IDX[p.city]?'':' Wybierz miasto z listy, żeby użyć cen z konkretnego miasta.'}`:''}${c.m&&c.m!==mm?`<br><span class="neg">Brakuje danych do wybranego sposobu – użyto: ${RE_M[c.m]}.</span>`:''}${!c.m?'<br><span class="neg">Brak danych do wyceny – pokazana jest wartość po kosztach.</span>':''}</div>
+  <h3>Koszty (remont, wyposażenie, opłaty przy zakupie)</h3>
+  <div class="tw"><table><thead><tr><th class="l">Data</th><th class="l">Opis</th><th>Kwota (zł)</th><th></th></tr></thead><tbody>${(p.costs||[]).map(x=>`<tr><td class="l">${esc(x.d)}</td><td class="l">${esc(x.desc)}</td><td class="v">${fmt(x.x)}</td><td><button class="link" onclick="reCostDel('${p.id}','${x.id}')">usuń</button></td></tr>`).join('')}
+   <tr><td class="l"><input type="date" id="cd_${p.id}" style="width:140px"></td><td class="l"><input id="cn_${p.id}" placeholder="np. remont łazienki" style="width:190px"></td><td><input id="cx_${p.id}" type="number" step="any" inputmode="decimal" style="width:100px"></td><td><button class="btn sec" onclick="reCostAdd('${p.id}')">Dodaj</button></td></tr></tbody></table></div>
+  <h3>Najem <small class="mut" style="font-weight:400">okresy z miesięcznym czynszem</small></h3>
+  <div class="tw"><table><thead><tr><th class="l">Od (RRRR-MM)</th><th class="l">Do (puste = trwa)</th><th>Czynsz / mies. (zł)</th><th>Koszty właściciela / mies. (zł)</th><th></th></tr></thead><tbody>${(p.rent||[]).map(r=>`<tr><td class="l"><input type="month" value="${esc(r.from)}" style="width:130px" onchange="reRentUp('${p.id}','${r.id}','from',this.value)"></td><td class="l"><input type="month" value="${esc(r.to)}" style="width:130px" onchange="reRentUp('${p.id}','${r.id}','to',this.value)"></td><td><input type="number" step="any" inputmode="decimal" value="${nv(r.amt)}" style="width:100px" onchange="reRentUp('${p.id}','${r.id}','amt',this.value)"></td><td><input type="number" step="any" inputmode="decimal" value="${nv(r.cost)}" style="width:100px" onchange="reRentUp('${p.id}','${r.id}','cost',this.value)"></td><td><button class="link" onclick="reRentDel('${p.id}','${r.id}')">usuń</button></td></tr>`).join('')}
+   <tr><td class="l"><input type="month" id="rf_${p.id}" placeholder="RRRR-MM" style="width:130px"></td><td class="l"><input type="month" id="rt_${p.id}" placeholder="RRRR-MM" style="width:130px"></td><td><input id="ra_${p.id}" type="number" step="any" inputmode="decimal" style="width:100px"></td><td><input id="rk_${p.id}" type="number" step="any" inputmode="decimal" style="width:100px"></td><td><button class="btn sec" onclick="reRentAdd('${p.id}')">Dodaj</button></td></tr></tbody></table></div>
+  <div class="row">${fld('Podatek od najmu (% przychodu, np. 8,5 ryczałt; 0 = pomiń)',inp('tax','number',110))}</div>
+  <h3>Wynik</h3><div class="g3">
+   ${tile('Wartość obecna',fmt(c.v,0)+' zł')}
+   ${tile('Zainwestowano (zakup + koszty)',fmt(c.inv,0)+' zł')}
+   ${tile('Zmiana wartości',sg(c.gain)+' zł'+(c.gainP==null?'':' ('+pc(c.gainP)+')'),cl(c.gain))}
+   ${tile('Najem netto łącznie ('+c.rt.months+' mies.)',fmt(c.rt.net,0)+' zł',cl(c.rt.net))}
+   ${tile('Zysk całkowity',sg(c.profit)+' zł'+(c.roi==null?'':' ('+pc(c.roi)+')'),cl(c.profit))}
+   ${tile('Rentowność najmu od wartości obecnej (12 mies.)',c.y12==null?'–':fmt(c.y12)+' %')}
+   ${tile('Rentowność najmu od ceny zakupu (12 mies.)',c.y12c==null?'–':fmt(c.y12c)+' %')}
+  </div>
+  <div class="g3" style="margin-top:8px">${tile('Stopa zwrotu',c.roi==null?'–':pc(c.roi),cl(c.roi))}${tile('Średnioroczna stopa zwrotu',c.xi==null?'–':pc(c.xi*100),cl(c.xi))}</div>
+  <div class="note">${c.xi==null?'Średnioroczna stopa wymaga daty i ceny zakupu.':'Stopa zwrotu = zysk całkowity (zmiana wartości + najem netto) podzielony przez zainwestowaną kwotę (zakup + koszty). Średnioroczna stopa uwzględnia daty wpłat (zakup, koszty), czynszów i wartość dziś (XIRR).'}</div>
+  <div class="row"><button class="btn sec" onclick="reDel('${p.id}')">Usuń nieruchomość</button></div></div>`;
+  return h;
+}
+function reDash(){
+  if(!S.re.length)return'';
+  const R=reTot();
+  return`<div class="card"><h2>Nieruchomości <small>w zł${S.opt.reIn?' · wliczone do podsumowania powyżej':''}</small></h2><div class="g3">
+   ${tile('Wartość',big(R.val))}
+   ${tile('Zainwestowano',big(R.inv))}
+   ${tile('Zmiana wartości',sg(R.gain)+(R.gainP==null?'':' ('+pc(R.gainP)+')'),cl(R.gain))}
+   ${tile('Najem netto łącznie',big(R.net),cl(R.net))}
+   ${tile('Zysk całkowity',sg(R.profit)+(R.roi==null?'':' ('+pc(R.roi)+')'),cl(R.profit))}
+   ${tile('Rentowność najmu od wartości obecnej (12 mies.)',R.y12==null?'–':fmt(R.y12)+' %')}
+   ${tile('Rentowność najmu od ceny zakupu (12 mies.)',R.y12c==null?'–':fmt(R.y12c)+' %')}
+   ${tile('Stopa zwrotu',R.roi==null?'–':pc(R.roi),cl(R.roi))}
+   ${(()=>{if(!R.ok)return tile('Średnioroczna stopa zwrotu','–');const x=xirr([...R.fl,{t:Date.now(),v:R.val}]);return tile('Średnioroczna stopa zwrotu',x==null?'–':pc(x*100),cl(x))})()}
+  </div><div class="tw" style="margin-top:10px"><table><thead><tr><th class="l">Nieruchomość</th><th>Wartość</th><th>Zainwestowano</th><th>Zysk całkowity</th></tr></thead><tbody>${S.re.map(p=>{const c=reCalc(p);return`<tr class="rer" title="Przejdź do nieruchomości" onclick="reGo('${p.id}')"><td class="l"><span class="ren">${esc(p.name)}</span></td><td class="v">${fmt(c.v,0)}</td><td class="v">${fmt(c.inv,0)}</td><td class="v ${cl(c.profit)}">${sg(c.profit)}</td></tr>`}).join('')}</tbody></table></div>
+  <div class="row" style="margin-top:10px"><button class="btn sec" onclick="go('re')">Szczegóły i edycja</button></div></div>`;
+}
+function vRe(){
+  let h=`<div class="card"><h2>Nieruchomości</h2><p class="note">Dodaj mieszkania, domy i inne nieruchomości: cenę zakupu, koszty (np. remont), wartość obecną i dochód z najmu. Nieruchomości są liczone osobno od kont XTB (w złotych); w Kokpicie możesz je wliczyć do podsumowania portfela. Dane zostają tylko na tym urządzeniu, tak jak reszta.</p><div class="row"><button class="btn" onclick="reAdd()">+ Dodaj nieruchomość</button></div></div>`;
+  if(S.re.length)h+=reDash().replace(/<div class="row" style="margin-top:10px">.*?<\/div>/s,'');
+  h+=S.re.map(reCard).join('');
+  h+=`<div class="card"><h2>Ceny mieszkań w miastach <small>dane NBP, zł/m²</small></h2><div class="info">Z tych cen (rynek wtórny, czyli mieszkania używane) aplikacja liczy wzrost wartości mieszkania od daty zakupu (cena zakupu razy cena dziś podzielona przez cenę w dniu zakupu, z interpolacją między kwartałami). Źródło: ceny transakcyjne NBP, IV kwartał każdego roku, dla 2026 roku II kwartał (Katowice: I kwartał). To średnie dla całych miast – dzielnica, piętro, standard i rocznik budynku nie są uwzględnione, więc wycena jest szacunkiem, nie operatem.</div>${['w'].map(m=>{const cs=Object.keys(RE_IDX),ss=cs.map(c=>reSer(c,m));return`<details style="margin-top:10px"><summary><b>Historia cen – rynek ${m==='w'?'wtórny':'pierwotny'} (zł/m²)</b></summary><div class="tw"><table><thead><tr><th class="l">Rok</th>${cs.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${ss[0].map((o,i)=>`<tr><td class="l">${o.y===2026?'II kw. 2026':'IV kw. '+o.y}</td>${ss.map(x=>`<td>${x[i].est?'<i class="mut">'+fmt(x[i].v,0)+'</i>':fmt(x[i].v,0)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`}).join('')}
+  <div class="note">Kursywa oznacza wartość oszacowaną (brak danych NBP dla tego miasta i roku). Ceny NBP dla Katowic na rynku wtórnym są wyraźnie niższe niż w ogłoszeniach, ale do wyceny liczy się tylko ich zmiana w czasie. Dla miasta spoza listy aplikacja używa średniego wzrostu z 7 miast.</div></div>`;
+  return h;
+}
+
 /* ================= Widoki ================= */
-const TABS=[['dash','Kokpit'],['inv','Inwestycje'],['led','Transakcje'],['imp','Import raportów XTB'],['acc','Konta'],['px','Ceny i instrumenty'],['set','Ustawienia']];
+const TABS=[['dash','Kokpit'],['inv','Inwestycje'],['re','Nieruchomości'],['led','Transakcje'],['imp','Import raportów XTB'],['acc','Konta'],['px','Ceny i instrumenty'],['set','Ustawienia']];
 function render(){
   if(!CUR){showLogin();return}
   document.getElementById('login').style.display='none';
@@ -816,7 +1023,7 @@ function render(){
   f.onchange=()=>{V.acc=f.value;render()};
   document.getElementById('tk').innerHTML=`<span title="${SV.ok?'Serwer cen działa':'Brak cen na żywo – '+SRVHINT()}">${SV.ok?'<b style="color:#2a7d00;cursor:default">● ceny na żywo</b>':'○ offline'}</span>`+['USD','EUR','GBP','CHF'].map(c=>`<span>${c} <b onclick="go('set')" title="Zmień w Ustawieniach">${fmt(S.fx[c],4)}</b></span>`).join('');
   document.body.classList.toggle('hide',!!S.opt.hide);
-  document.getElementById('app').innerHTML=({dash:vDash,inv:vInv,led:vLed,imp:vImp,acc:vAcc,px:vPx,set:vSet})[V.tab]();
+  document.getElementById('app').innerHTML=({dash:vDash,inv:vInv,re:vRe,led:vLed,imp:vImp,acc:vAcc,px:vPx,set:vSet})[V.tab]();
 }
 function go(t){V.tab=t;render();scrollTo(0,0)}
 const noData=()=>`<div class="card empty"><h2>Zacznij od zaimportowania raportów z XTB</h2><p class="mut">Wybierz pliki .xlsx (Cash Operations, Closed Positions, Open Positions) albo cały folder z pobranymi raportami – konta (IKE, IKZE, PLN, EUR, USD) zostaną utworzone automatycznie.</p><button class="btn" onclick="go('imp')">Import raportów XTB</button></div>`;
@@ -849,6 +1056,7 @@ function vDash(){
     <select onchange="S.opt.cur=this.value;save();render()">${['PLN','USD','EUR','GBP','CHF'].map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('')}</select>
     ${ck('percur','Pokaż podsumowania portfeli per waluta')}
     ${ck('cfdIn','Wliczaj wyniki CFD (zamknięte pozycje CFD, swap) do zysku i stopy zwrotu – domyślnie pomijane')}
+    ${ck('reIn','Wliczaj nieruchomości do podsumowania w przeliczeniu na walutę (wartość, wkład i zysk z najmu; TWR dotyczy tylko kont XTB)')}
     ${ck('round','Formatuj duże wartości z zaokrągleniem do tysięcy/milionów')}
     ${ck('hide','Ukryj wartości')}
     <label>Notowania na żywo i historia</label>
@@ -857,7 +1065,8 @@ function vDash(){
     ${ck('auto','Odświeżaj ceny automatycznie co 5 minut (gdy działa serwer)')}
     ${hasHist?'':`<div class="note">Wkład własny w innych walutach liczony po bieżących kursach – pobierz historyczne kursy NBP w Ustawieniach, żeby był dokładny.</div>`}
   </div>`;
-  h+=summary(`Podsumowanie portfeli w przeliczeniu na ${cur}`,T,cur);
+  h+=summary(`Podsumowanie portfeli w przeliczeniu na ${cur}`,withRe(T,cur),cur,(S.opt.reIn&&S.re.length)?'z nieruchomościami':'');
+  h+=reDash();
   if(S.opt.percur&&curs.length>0&&!(curs.length===1&&curs[0]===cur))curs.forEach(c=>{h+=summary(`Podsumowanie portfeli w ${c}`,agg(list.filter(A=>A.a.cur===c),null),c)});
   // portfele
   h+=`<div class="card"><h2>Portfele</h2><div class="pf">${sel(true).map(A=>{
