@@ -855,20 +855,38 @@ function reGrowth(p){
 }
 const reYm=s=>{const m=/^(\d{4})-(\d{2})/.exec(s||'');return m?(+m[1])*12+(+m[2]-1):null};
 const renum=v=>{const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:0};
+const reSh=p=>{const x=+p.share;return x>0&&x<=100?x/100:1};
 function reEst(p){
   const o={};
-  if(p.buyPrice>0&&p.buyDate){const g=reGrowth(p);o.gr=p.buyPrice*g.f;o.g=g}
-  if(p.manual>0)o.man=+p.manual;
+  const sh=reSh(p);
+  if(p.buyPrice>0&&p.buyDate){const g=reGrowth(p);o.gr=p.buyPrice*sh*g.f;o.g=g}
+  if(p.manual>0)o.man=+p.manual*sh;
   return o;
 }
+const RE_LIM=100000;
+const reMode=p=>p.taxMode||(p.tax>0?'fixed':'auto');
+let reTaxC={k:'',v:null};
+function reTaxMap(){ // ryczałt: 8,5% do 100 tys. zł przychodu rocznie (łącznie, dla udziału właściciela), 12,5% od nadwyżki
+  const d=new Date(),cm=d.getFullYear()*12+d.getMonth();
+  const key=cm+JSON.stringify(S.re.map(p=>[p.id,p.share,p.taxMode,p.tax,p.rent]));
+  if(reTaxC.k===key)return reTaxC.v;
+  const ev=[];
+  S.re.forEach((p,pi)=>{if(reMode(p)!=='auto')return;const sh=reSh(p);
+    (p.rent||[]).forEach((r,ri)=>{const a=reYm(r.from);if(a==null)return;let b=r.to?reYm(r.to):cm;if(b==null)b=cm;b=Math.min(b,cm);
+      for(let m=a;m<=b;m++)ev.push({m,pi,k:p.id+'|'+ri+'|'+m,am:(r.amt||0)*sh})})});
+  ev.sort((x,y)=>x.m-y.m||x.pi-y.pi);
+  const cum={},map={};
+  ev.forEach(e=>{const y=Math.floor(e.m/12),c=cum[y]||0,low=Math.max(0,Math.min(e.am,RE_LIM-c)),high=e.am-low;cum[y]=c+e.am;map[e.k]=low*0.085+high*0.125});
+  reTaxC={k:key,v:map};return map;
+}
 function reRent(p){
-  const now=new Date(),cm=now.getFullYear()*12+now.getMonth(),tx=(p.tax||0)/100;
+  const now=new Date(),cm=now.getFullYear()*12+now.getMonth(),md=reMode(p),tx=md==='fixed'?(p.tax||0)/100:0,tm=md==='auto'?reTaxMap():null;
   let g=0,k=0,t=0,n12=0,g12=0,mo=0;const fl=[];
-  (p.rent||[]).forEach(r=>{
+  (p.rent||[]).forEach((r,ri)=>{
     const a=reYm(r.from);if(a==null)return;
     let b=r.to?reYm(r.to):cm;if(b==null)b=cm;b=Math.min(b,cm);
     for(let m=a;m<=b;m++){
-      const am=r.amt||0,co=r.cost||0,tax=am*tx,net=am-co-tax;
+      const sh=reSh(p),am=(r.amt||0)*sh,co=(r.cost||0)*sh,tax=tm?(tm[p.id+'|'+ri+'|'+m]||0):am*tx,net=am-co-tax;
       g+=am;k+=co;t+=tax;mo++;fl.push({t:Math.min(Date.UTC(Math.floor(m/12),m%12,15),Date.now()),v:net});
       if(cm-m<12){g12+=am;n12+=net}
     }
@@ -878,15 +896,106 @@ function reRent(p){
 function reCalc(p){
   const e=reEst(p),order=p.method==='man'?['man','gr']:['gr','man'];
   let v=null,m=null;for(const k of order)if(e[k]!=null){v=e[k];m=k;break}
-  const buy=p.buyPrice||0,cs=sum((p.costs||[]).map(x=>x.x||0)),inv=buy+cs;
+  const sh=reSh(p),buy=(p.buyPrice||0)*sh,cs=sum((p.costs||[]).map(x=>x.x||0))*sh,inv=buy+cs;
   if(v==null){v=inv;m=null}
   const rt=reRent(p),gain=v-inv,profit=gain+rt.net;
   const fl=[];
   if(p.buyDate&&buy>0)fl.push({t:ms(p.buyDate),v:-buy});
-  (p.costs||[]).forEach(c=>{if(c.d&&c.x)fl.push({t:ms(c.d),v:-c.x})});
+  (p.costs||[]).forEach(c=>{if(c.d&&c.x)fl.push({t:ms(c.d),v:-c.x*sh})});
   rt.fl.forEach(f=>fl.push(f));
   const xi=p.buyDate&&buy>0?xirr([...fl,{t:Date.now(),v}]):null;
   return{e,v,m,buy,cs,inv,rt,gain,gainP:inv>0?gain/inv*100:null,profit,roi:inv>0?profit/inv*100:null,y12:v>0?rt.net12/v*100:null,y12c:inv>0?rt.net12/inv*100:null,xi,fl,dated:!!(p.buyDate&&buy>0)};
+}
+
+/* ===== Import nieruchomości z xlsx ===== */
+let RI={items:[],skipped:0,err:'',busy:false};
+const reYmS=n=>Math.floor(n/12)+'-'+String(n%12+1).padStart(2,'0');
+function reParseYm(v){
+  if(v==null||v==='')return null;v=String(v).trim();
+  let m=/^(\d{4})-(\d{2})/.exec(v);if(m)return m[1]+'-'+m[2];
+  m=/^(\d{1,2})[.\/-](\d{4})$/.exec(v);if(m)return m[2]+'-'+m[1].padStart(2,'0');
+  m=/^(\d{4})[.\/](\d{1,2})$/.exec(v);if(m)return m[1]+'-'+m[2].padStart(2,'0');
+  return null;
+}
+const reNorm=x=>String(x==null?'':x).normalize('NFD').replace(/[\u0300-\u0361]/g,'').replace(/ł/gi,'l').replace(/\s+/g,' ').trim().toLowerCase();
+function reCityMatch(x){const n=reNorm(x);if(!n)return{city:'',ok:true};const k=Object.keys(RE_IDX).find(c=>reNorm(c)===n||reNorm(c).startsWith(n)&&n.length>=4);return k?{city:k,ok:true}:{city:'Inne',ok:false,raw:String(x).trim()}}
+function reParseSheets(sheets){
+  const items=[];let skipped=0,found=false;
+  for(const rows of Object.values(sheets)){
+    const hi=rows.findIndex(r=>r.some(c=>/cena zakupu/i.test(String(c))));if(hi<0)continue;found=true;
+    const H=rows[hi].map(c=>String(c==null?'':c).toLowerCase());
+    const ix=f=>H.findIndex(f);
+    const C={date:ix(h=>/(rok|data).*zakupu/.test(h)&&!/^cena/.test(h)),price:ix(h=>/^cena zakupu/.test(h)),share:ix(h=>/udzia/.test(h)),reno:ix(h=>/remont/.test(h)),
+      from:ix(h=>/(rok|data).*(rozpocz|najmu)/.test(h)),r0:ix(h=>/czynsz.*pocz/.test(h)),r1:ix(h=>/czynsz.*najnowsz/.test(h)),gap:ix(h=>/przerw/.test(h)),ins:ix(h=>/ubezpiecz/.test(h)),
+      city:ix(h=>/miast/.test(h)),tax:ix(h=>/(podatek|stawka)/.test(h)&&!/czynsz/.test(h)),area:ix(h=>/powierzchni/.test(h)),year:ix(h=>/rok budowy/.test(h))};
+    const cm=(()=>{const d=new Date();return d.getFullYear()*12+d.getMonth()})();
+    for(let i=hi+1;i<rows.length;i++){
+      const r=rows[i],g=k=>C[k]>=0?r[C[k]]:'',num=k=>{const v=g(k);return v===''||v==null?0:renum(v)};
+      const price=num('price'),date=reParseYm(g('date'));
+      if(!(price>0)&&!date){if(r.some(c=>c!==''&&c!=null))skipped++;continue}
+      const warn=[],tp=String(r[0]||'').trim(),id=String(r[1]==null?'':r[1]).trim();
+      const type=RE_TYPES.find(t=>tp&&t.toLowerCase().startsWith(tp.toLowerCase().slice(0,5)))||'Mieszkanie';
+      let sh=num('share');if(sh>0&&sh<=1)sh*=100;if(!(sh>0&&sh<100))sh=null;
+      const bd=date?date+'-01':'';
+      if(!date)warn.push('brak daty zakupu');if(!(price>0))warn.push('brak ceny zakupu');
+      const it={key:(tp+'|'+id+'|'+(date||'')).toLowerCase(),name:(type+(id?' '+id:'')),type,city:'',buyDate:bd,buyPrice:price,share:sh,tax:num('tax')||null,costs:[],rent:[],area:num('area'),year:num('year'),warn};
+      const reno=num('reno');if(reno>0)it.costs.push({id:uid(),d:bd||new Date().toISOString().slice(0,10),desc:'Remont (import)',x:reno});
+      const from=reParseYm(g('from')),r0=num('r0'),r1=num('r1')||r0,gap=Math.max(0,Math.round(num('gap'))),cost=Math.round(num('ins')/12*100)/100;
+      if(from&&(r0||r1)){
+        const s0=reYm(from),n=cm-s0+1;
+        if(n<1)warn.push('początek najmu w przyszłości');
+        else if(r0&&r1&&r0!==r1&&n-gap>=2){
+          const half=Math.floor((n-gap)/2);
+          it.rent.push({id:uid(),from,to:reYmS(s0+half-1),amt:r0,cost});
+          it.rent.push({id:uid(),from:reYmS(s0+half+gap),to:'',amt:r1,cost});
+          warn.push('zmianę czynszu '+r0+' → '+r1+' zł'+(gap?' i '+gap+' mies. przerwy':'')+' wstawiono w połowie okresu najmu (w pliku nie ma daty)');
+        }else if(gap>0&&n-gap>=2){
+          const half=Math.floor((n-gap)/2);
+          it.rent.push({id:uid(),from,to:reYmS(s0+half-1),amt:r1||r0,cost});
+          it.rent.push({id:uid(),from:reYmS(s0+half+gap),to:'',amt:r1||r0,cost});
+          warn.push(gap+' mies. przerwy w najmie wstawiono w połowie okresu (w pliku nie ma daty)');
+        }else it.rent.push({id:uid(),from,to:'',amt:r1||r0,cost});
+      }
+      const cm0=reCityMatch(g('city'));it.city=cm0.city;if(!cm0.ok)warn.push('miasto „'+cm0.raw+'” nie ma danych NBP w aplikacji – użyto średniej z 7 miast (dostępne: '+Object.keys(RE_IDX).join(', ')+')');
+      if(!cm0.city)warn.push('brak miasta – wybierz je w karcie (bez miasta użyta zostanie średnia z 7 miast)');
+      items.push(it);
+    }
+  }
+  return{items,skipped,found};
+}
+async function reLoadFile(list){
+  if(typeof DecompressionStream==='undefined'){toast('Ta przeglądarka jest za stara – użyj aktualnego Chrome, Edge lub Firefox');return}
+  const f=[...list].find(x=>/\.xlsx$/i.test(x.name));if(!f){toast('Wybierz plik .xlsx');return}
+  RI={items:[],skipped:0,err:'',busy:true};render();
+  try{
+    const r=reParseSheets(await readXlsx(await f.arrayBuffer()));
+    RI={items:r.items,skipped:r.skipped,err:r.found?(r.items.length?'':'W pliku nie ma wierszy z ceną lub datą zakupu.'):'To nie jest plik z parametrami nieruchomości (brak kolumny „cena zakupu”).',busy:false};
+  }catch(e){RI={items:[],skipped:0,err:f.name+': '+e.message,busy:false}}
+  render();
+}
+function reImportAll(){
+  let a=0,u=0;
+  RI.items.forEach(it=>{
+    let p=S.re.find(x=>x.imp===it.key);
+    if(!p){p={id:uid(),imp:it.key,name:it.name,type:it.type,city:it.city,buyDate:'',buyPrice:0,method:'gr',manual:0,manualDate:'',tax:0,costs:[],rent:[]};S.re.push(p);a++}else u++;
+    p.type=it.type;if(it.city)p.city=it.city;p.buyDate=it.buyDate;p.buyPrice=it.buyPrice;p.share=it.share;if(it.tax){p.tax=it.tax;p.taxMode='fixed'}
+    p.costs=it.costs.map(c=>Object.assign({},c));p.rent=it.rent.map(r=>Object.assign({},r));
+  });
+  RI={items:[],skipped:0,err:'',busy:false};save();render();
+  toast(`Nieruchomości: dodano ${a}${u?', zaktualizowano '+u:''}`);
+}
+function reImpCard(){
+  let h=`<div class="card"><h2>Import z pliku xlsx</h2><div class="info">Wczytaj plik z parametrami nieruchomości (kolumny: cena zakupu, rok i miesiąc zakupu, udział własności, koszt remontu, rok i miesiąc rozpoczęcia najmu, czynsz początkowy i najnowszy, przerwy w najmie, roczny koszt ubezpieczenia; opcjonalnie miasto i podatek %). Wiersze bez ceny i daty zakupu są pomijane. Ponowny import tej samej nieruchomości aktualizuje ją, zamiast dodawać drugą.</div>
+  <div class="row"><div><label>Plik .xlsx</label><input type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="reLoadFile(this.files);this.value=''"></div></div>`;
+  if(RI.busy)h+='<div class="note">Czytam plik…</div>';
+  if(RI.err)h+=`<div class="note neg">${esc(RI.err)}</div>`;
+  if(RI.items.length){
+    h+=`<div class="tw" style="margin-top:10px"><table><thead><tr><th class="l">Nieruchomość</th><th>Miasto</th><th>Zakup</th><th>Cena (zł)</th><th>Udział</th><th>Remont (zł)</th><th>Najem od</th><th>Czynsz (zł/mies.)</th></tr></thead><tbody>${RI.items.map(it=>`<tr><td class="l">${esc(it.name)}${S.re.some(x=>x.imp===it.key)?' <small class="mut">(zaktualizuje istniejącą)</small>':''}</td><td>${esc(it.city||'–')}</td><td>${esc(it.buyDate.slice(0,7))}</td><td class="v">${fmt(it.buyPrice,0)}</td><td>${it.share?fmt(it.share,0)+' %':'100 %'}</td><td class="v">${fmt(sum(it.costs.map(c=>c.x)),0)}</td><td>${esc(it.rent.length?it.rent[0].from:'–')}</td><td class="v">${it.rent.length?fmt(it.rent[it.rent.length-1].amt,0):'–'}</td></tr>`).join('')}</tbody></table></div>`;
+    RI.items.forEach(it=>{if(it.warn.length||it.area||it.year)h+=`<div class="note"><b>${esc(it.name)}:</b> ${it.warn.map(esc).join('; ')}${(it.area||it.year)&&it.warn.length?'; ':''}${it.area||it.year?'pominięto '+[it.area?'powierzchnię ('+it.area+' m²)':'',it.year?'rok budowy ('+it.year+')':''].filter(Boolean).join(' i ')+' – aplikacja ich nie używa do wyceny':''}.</div>`});
+    if(RI.skipped)h+=`<div class="note">Pominięto ${RI.skipped} wiersz(y) bez ceny i daty zakupu.</div>`;
+    h+=`<div class="row" style="margin-top:12px"><button class="btn" onclick="reImportAll()">Dodaj ${RI.items.length} nieruchomości</button><button class="btn sec" onclick="RI={items:[],skipped:0,err:'',busy:false};render()">Anuluj</button></div>`;
+  }
+  return h+'</div>';
 }
 function reTot(){
   const R={n:S.re.length,val:0,inv:0,gain:0,net:0,net12:0,profit:0,fl:[],ok:true};
@@ -915,6 +1024,7 @@ const reGet=id=>S.re.find(x=>x.id===id);
 function reSet(id,f,v){
   const p=reGet(id);if(!p)return;
   if(['buyPrice','manual','tax'].includes(f))p[f]=Math.max(0,renum(v));
+  else if(f==='share'){const x=renum(v);p.share=x>0&&x<100?x:null}
   else if(f==='growth')p.growth=String(v).trim()===''?null:renum(v);
   else p[f]=String(v).trim();
   if(f==='name'&&!p.name)p.name='Nieruchomość';
@@ -954,7 +1064,8 @@ function reCard(p){
   const mm=p.method==='man'?'man':'gr';
   let h=`<div class="card rec" id="re_${p.id}"><h2><input value="${esc(p.name)}" onchange="reSet('${p.id}','name',this.value)" title="Nazwa nieruchomości"> <small>${esc(p.type)}${p.city?' · '+esc(p.city):''}</small> <button class="btn sec" style="float:right;font-size:12px;padding:5px 10px" onclick="reDel('${p.id}')">🗑 Usuń</button></h2>
   <div class="row">${fld('Rodzaj',sel('type',RE_TYPES))}${fld('Miasto',sel('city',[...Object.keys(RE_IDX),'Inne'],'– wybierz –'))}</div>
-  <div class="row">${fld('Data zakupu',inp('buyDate','date',150))}${fld('Cena zakupu (zł)',inp('buyPrice','number',130))}</div>
+  <div class="row">${fld('Data zakupu',inp('buyDate','date',150))}${fld('Cena zakupu (zł, całość)',inp('buyPrice','number',130))}${fld('Udział własności (%)',inp('share','number',90,'100'))}</div>
+  ${reSh(p)<1?`<div class="note">Wyniki, wartość, koszty i najem liczone są dla Twojego udziału: <b>${fmt(reSh(p)*100,0)}%</b>. Kwoty w tabelach poniżej wpisuj dla całości nieruchomości.</div>`:''}
   <h3>Wartość obecna</h3>
   <div class="row">${fld('Sposób wyceny',`<select style="max-width:100%" onchange="reSet('${p.id}','method',this.value)">${Object.keys(RE_M).map(k=>`<option value="${k}" ${k===mm?'selected':''}>${RE_M[k]}</option>`).join('')}</select>`)}
    ${mm==='man'?fld('Wartość (zł)',inp('manual','number',130))+fld('Z dnia',inp('manualDate','date',150)):''}</div>
@@ -965,7 +1076,8 @@ function reCard(p){
   <h3>Najem <small class="mut" style="font-weight:400">okresy z miesięcznym czynszem</small></h3>
   <div class="tw"><table><thead><tr><th class="l">Od (RRRR-MM)</th><th class="l">Do (puste = trwa)</th><th>Czynsz / mies. (zł)</th><th>Koszty właściciela / mies. (zł)</th><th></th></tr></thead><tbody>${(p.rent||[]).map(r=>`<tr><td class="l"><input type="month" value="${esc(r.from)}" style="width:130px" onchange="reRentUp('${p.id}','${r.id}','from',this.value)"></td><td class="l"><input type="month" value="${esc(r.to)}" style="width:130px" onchange="reRentUp('${p.id}','${r.id}','to',this.value)"></td><td><input type="number" step="any" inputmode="decimal" value="${nv(r.amt)}" style="width:100px" onchange="reRentUp('${p.id}','${r.id}','amt',this.value)"></td><td><input type="number" step="any" inputmode="decimal" value="${nv(r.cost)}" style="width:100px" onchange="reRentUp('${p.id}','${r.id}','cost',this.value)"></td><td><button class="link" onclick="reRentDel('${p.id}','${r.id}')">usuń</button></td></tr>`).join('')}
    <tr><td class="l"><input type="month" id="rf_${p.id}" placeholder="RRRR-MM" style="width:130px"></td><td class="l"><input type="month" id="rt_${p.id}" placeholder="RRRR-MM" style="width:130px"></td><td><input id="ra_${p.id}" type="number" step="any" inputmode="decimal" style="width:100px"></td><td><input id="rk_${p.id}" type="number" step="any" inputmode="decimal" style="width:100px"></td><td><button class="btn sec" onclick="reRentAdd('${p.id}')">Dodaj</button></td></tr></tbody></table></div>
-  <div class="row">${fld('Podatek od najmu (% przychodu, np. 8,5 ryczałt; 0 = pomiń)',inp('tax','number',110))}</div>
+  <div class="row">${fld('Podatek od najmu',`<select style="max-width:100%" onchange="reSet('${p.id}','taxMode',this.value)">${[['auto','ryczałt automatycznie (8,5% / 12,5%)'],['fixed','stała stawka %'],['none','bez podatku']].map(([k,l])=>`<option value="${k}" ${k===reMode(p)?'selected':''}>${l}</option>`).join('')}</select>`)}${reMode(p)==='fixed'?fld('Stawka (% przychodu)',inp('tax','number',100)):''}</div>
+  <div class="note">${reMode(p)==='auto'?'Ryczałt od przychodu z najmu (czynsz bez mediów, bez odliczania kosztów): 8,5% do 100 000 zł rocznie, 12,5% od nadwyżki ponad 100 000 zł. Próg liczony jest osobno dla każdego roku, łącznie dla wszystkich Twoich nieruchomości w aplikacji i dla Twojego udziału.':reMode(p)==='fixed'?'Podatek = podana stawka × przychód z czynszu.':'Najem netto liczony bez podatku.'}${c.rt.tax>0?` Podatek od najmu łącznie: <b>${fmt(c.rt.tax,0)} zł</b>.`:''}</div>
   <h3>Wynik</h3><div class="g3">
    ${tile('Wartość obecna',fmt(c.v,0)+' zł')}
    ${tile('Zainwestowano (zakup + koszty)',fmt(c.inv,0)+' zł')}
@@ -998,6 +1110,7 @@ function reDash(){
 }
 function vRe(){
   let h=`<div class="card"><h2>Nieruchomości</h2><p class="note">Dodaj mieszkania, domy i inne nieruchomości: cenę zakupu, koszty (np. remont), wartość obecną i dochód z najmu. Nieruchomości są liczone osobno od kont XTB (w złotych); w Kokpicie możesz je wliczyć do podsumowania portfela. Dane zostają tylko na tym urządzeniu, tak jak reszta.</p><div class="row"><button class="btn" onclick="reAdd()">+ Dodaj nieruchomość</button></div></div>`;
+  h+=reImpCard();
   if(S.re.length)h+=reDash().replace(/<div class="row" style="margin-top:10px">.*?<\/div>/s,'');
   h+=S.re.map(reCard).join('');
   h+=`<div class="card"><h2>Ceny mieszkań w miastach <small>dane NBP, zł/m²</small></h2><div class="info">Z tych cen (rynek wtórny, czyli mieszkania używane) aplikacja liczy wzrost wartości mieszkania od daty zakupu (cena zakupu razy cena dziś podzielona przez cenę w dniu zakupu, z interpolacją między kwartałami). Źródło: ceny transakcyjne NBP, IV kwartał każdego roku, dla 2026 roku II kwartał (Katowice: I kwartał). To średnie dla całych miast – dzielnica, piętro, standard i rocznik budynku nie są uwzględnione, więc wycena jest szacunkiem, nie operatem.</div>${['w'].map(m=>{const cs=Object.keys(RE_IDX),ss=cs.map(c=>reSer(c,m));return`<details style="margin-top:10px"><summary><b>Historia cen – rynek ${m==='w'?'wtórny':'pierwotny'} (zł/m²)</b></summary><div class="tw"><table><thead><tr><th class="l">Rok</th>${cs.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${ss[0].map((o,i)=>`<tr><td class="l">${o.y===2026?'II kw. 2026':'IV kw. '+o.y}</td>${ss.map(x=>`<td>${x[i].est?'<i class="mut">'+fmt(x[i].v,0)+'</i>':fmt(x[i].v,0)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`}).join('')}
